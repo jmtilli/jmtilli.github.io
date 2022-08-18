@@ -1,3 +1,3 @@
 # Stuff hosted under here:
 
-* Javafastcomplex documentation: http://jmtilli.github.io/javafastcomplexjavadoc
+* Javafastcomplex documentation: https://jmtilli.github.io/javafastcomplexjavadoc
