@@ -1,8 +1,212 @@
-<html><head><title>jmtilli.github.io</title></head><body>
-<h1>Stuff hosted under here:</h1>
+<!DOCTYPE html>
 
-<ul>
-<li>Javafastcomplex documentation: <a href="https://jmtilli.github.io/javafastcomplexjavadoc">https://jmtilli.github.io/javafastcomplexjavadoc</a></li>
-<li>Javaxmlfrag documentation: <a href="https://jmtilli.github.io/javaxmlfragjavadoc">https://jmtilli.github.io/javaxmlfragjavadoc</a></li>
-</ul<
+<html><head><title>jmtilli.github.io</title></head><body>
+
+<h1>Juha-Matti Tilli's Github portfolio</h1>
+
+<p>This is my Github portfolio in a format where repositories are not just
+listed like on the <a href="https://github.com/jmtilli">Github profile page</a>
+but also described in more detail. My Github profile page has also several
+minor repositories that are too unimportant to be listed here, and forks of
+software written by others that I do not want to falsely list here as my
+own.</p>
+
+<h2>MPloop</h2>
+
+<p><a href="https://github.com/jmtilli/mploop">MPloop in Github</a></p>
+
+<p>MPloop is a set of scripts for playing music in the background. The idea is
+that the "loop" part, which is a script that reads the queue and plays songs in
+that order, is started in a screen or tmux session. The "loop" uses MPlayer or
+a custom included music player as the tool for playing music.</p>
+
+<p>All of the songs are played from queue in the order they are in the
+queue.</p>
+
+<p>The user interface is simply a set of scripts managing the queue from a Unix
+shell, and a set of scripts controlling the player.</p>
+
+<h2>Pretty floating point to ASCII (prettyftoa)></h2>
+
+<p><a href="https://github.com/jmtilli/prettyftoa">prettyftoa in Github</a></p>
+
+<p>Sometimes there is a need to convert a floating point number to a string
+representation that converts back to the same number. The usual approach is a
+format specifier with enough precision such as "%.17g". However, there are
+several problems with this approach such as the fact that the floating point
+number 2.0 converts to the string "2" that incorrectly implies it is an
+integer. Also the floating point number 0.2 converts to "0.20000000000000001"
+instead of "0.2". The pretty ftoa library attempts to find the shortest
+"pretty" representation for a floating point number that still converts back to
+the same number and that clearly demonstrates the number is a floating point
+number and not an integer.</p>
+
+<h2>Streaming ASCII-to-floating-point (streamingatof)</h2>
+
+<p><a href="https://github.com/jmtilli/streamingatof">streamingatof in Github</a></p>
+
+<p>There are cases that the standard C library atof() function call do not
+handle. For example, atof() is defined only for continuous '\0'-terminated
+strings. Thus if you have a block of memory that is not guaranteed to be
+'\0'-terminated, you need to allocate a second block of potentially unlimited
+size to add the terminating '\0' character. Also, atof() requires all data to
+be stored in continuous memory at once, so calling it incrementally for newly
+arriving data blocks does not work. The only way to solve the incremental
+parsing problem is to allocate a buffer that needs to grow to potentially
+unbounded sizes to handle numbers such as 1e0, 10e-1, 100e-2, 1000e-3,
+10000e-4, 100000e-5, ... which all represent the number 1 in a series of
+representations that grow without bound. Streaming atof is designed to handle
+all those use cases where standard atof() fails.</p>
+
+<h2>caj: C API for JSON</h2>
+
+<p><a href="https://github.com/jmtilli/caj">caj in Github</a></p>
+
+<p>Usually JSON is parsed by a tree-based parser. If the data structures of the
+parser are different from the ones used in the program, a conversion needs to
+be performed to modify the parse tree to the desired format. CAJ is an
+event-driven parser for C language that allows directly parsing to the desired
+structures. CAJ also includes CAJUN, a tree-based variant; CAJ_out, a JSON
+output library allowing outputting JSON from any function; and CAJUNfrag, a
+parser combining the event-driven and tree-based approaches in a flexible
+way.</p>
+
+<h2>javajsonfrag</h2>
+
+<p><a href="https://github.com/jmtilli/javajsonfrag">javajsonfrag in Github</a></p>
+
+<p>Typically, JSON is parsed by a tree-based parser and almost never by an
+event-based parser. Event-based parsers are fast and have a low memory
+footprint, but a drawback is that it is cumbersome to write the required event
+handlers. Tree-based parsers make the code easier to write, to understand and
+to maintain but have a large memory footprint as a drawback. Usually, JSON is
+not used for huge files such as database dumps that necessitate event-based
+parsing, or so it would appear at a glance, because a tree-based parser cannot
+hold the whole parse tree in memory at the same time, and event-based parsing
+is not available in common libraries. JavaJSONFrag allows JSON to be parsed by
+event-based approach from the top, but optionally allowing switching to a
+tree-based approach for small structures. So for example a database dump
+containing billion objects can be parsed in an event-based manner but each
+object can be parsed into a tree. This allows using JSON for huge database
+dumps, and JSON is a far better serialization format than XML.</p>
+
+<h2>abce and Amyplan: a bytecode engine and a modifiable yacc-based language</h2>
+
+<p><a href="https://github.com/Aalto5G/abce">abce in Github (Aalto5G)</a>, <a
+href="https://github.com/jmtilli/abce">author's fork of abce</a></p>
+
+<p>A bytecode engine (abce) is a very simple bytecode engine with JSON data
+model and garbage collection, intended for strongly typed dynamic languages.
+The opcode format is stable and the argument order of opcodes is natural,
+meaning compiler can directly emit operations without reordering. A modifiable
+yacc-based programming language (Amyplan) is the programming language for
+writing abce programs.</p>
+
+<h2>stirmake: scalable true implementation of recursive make</h2>
+
+<p><a href="https://github.com/Aalto5G/stirmake">stirmake in Github
+(Aalto5G)</a>, <a href="https://github.com/jmtilli/stirmake">author's fork of
+stirmake</a></p>
+
+<p>Stirmake is scalable true implementation of recursive make. It is intended
+for easily creating whole-project build systems consisting of numerous modules.
+Numerous deficiencies in standard make have been solved while staying true to
+the idea of traditional make. For understanding why stirmake is necessary, read
+<a href="http://aegis.sourceforge.net/auug97.pdf">"Recursive Make Considered
+Harmful"</a> and try to follow its instructions.</p>
+
+<h2>jmalloc: variable sized high performance memory allocator</h2>
+
+<p><a href="https://github.com/Aalto5G/jmalloc">jmalloc in Github
+(Aalto5G)</a>, <a href="https://github.com/jmtilli/jmalloc">author's fork of
+stirmake</a></p>
+
+<p>jmalloc is a variable-sized single-threaded memory allocator over 3 times
+faster than standard Linux allocator. It is on a totally different location of
+the high performance - low fragmentation scale, wasting memory but saving CPU
+time. In contrast, other allocators waste CPU time but save memory.</p>
+
+<h2>YaLe: Yet another Lexer eliminator, or Yacc+Lex combined</h2>
+
+<p><a href="https://github.com/Aalto5G/yale">yale in Github (Aalto5G)</a>, <a
+href="https://github.com/jmtilli/yale">author's fork of yale</a></p>
+
+<p>YaLe is an event-driven incremental non-blocking network protocol parser
+generator for a state machine architecture. YaLe implements a finitely
+backtracking parser state dependent DFA based lexer for maximal munch
+tokenizing with a priority system. Parsing is conditionalized
+callback-attributed LL(1). The callback system is particularly sophisticated.
+YaLe parses HTTP at over 3 Gbps, whereas its main competitor, BinPAC, parses
+HTTP at 0.55 Gbps. YaLe can be used for both text and binary protocols.</p>
+
+<h2>cghcpcli: carrier grade HTTP proxy client</h2>
+
+<p><a href="https://github.com/Aalto5G/cghcpcli">cghcpcli in Github
+(Aalto5G)</a>, <a href="https://github.com/jmtilli/cghcpcli">author's fork of
+cghcpcli</a></p>
+
+<p>Carrier grade HTTP CONNECT proxy client offers a client-side mechanism for
+NAT traversal using a HTTP CONNECT proxy in the NAT middlebox.</p>
+
+<h2>ldpairwall: L Data Plane Airwall</h2>
+
+<p><a href="https://github.com/Aalto5G/ldpairwall">ldpairwall in Github
+Aalto5G)</a>, <a href="https://github.com/jmtilli/ldpairwall">author's fork of
+ldpairall</a></p>
+
+<p>The L Data Plane Airwall offers improved NAT traversal with no security
+policy. It is a prototype of an application layer NAT technology.</p>
+
+<h2>nmsynproxy: Netmap SYN proxy</h2>
+
+<p><a href="https://github.com/Aalto5G/nmsynproxy">nmsynproxy in Github
+(Aalto5G)</a>, <a href="https://github.com/jmtilli/nmsynproxy">author's fork of
+nmsynproxy</a></p>
+
+<p>The netmap SYN proxy offers state of the art TCP SYN proxy for protecting
+against TCP SYN flood attacks at line rate. The TCP SYN cookie mechanism it
+uses is particularly modern and well thought of. The feature set exceeds that
+of the Linux SYN proxy iptables module. It is implemented entirely in user
+space unlike the iptables module.</p>
+
+<h2>PPTK: packet processing toolkit</h2>
+
+<p><a href="https://github.com/Aalto5G/pptk">pptk in Github (Aalto5G)</a>, <a
+href="https://github.com/jmtilli/pptk">author's fork of pptk</a></p>
+
+<p>The packet processing toolkit contains several useful utilities for user
+space packet processing on Linux machines. It also includes L Data Plane, a
+data plane wrapper similar to OpenDataPlane but with higher netmap
+performance.</p>
+
+<h2>javaxmlfrag</h2>
+
+<p><a href="https://github.com/jmtilli/javaxmlfrag">javaxmlfrag in
+Github</a>, <a href="https://jmtilli.github.io/javaxmlfragjavadoc">javaxmlfrag documentation</a></p>
+
+<p>Typically, XML is either parsed by a tree-based parser or by an event-based
+parser. Event-based parsers are fast and have a low memory footprint, but a
+drawback is that it is cumbersome to write the required event handlers.
+Tree-based parsers make the code easier to write, to understand and to maintain
+but have a large memory footprint as a drawback. Often, XML is used for huge
+files such as database dumps that necessitate event-based parsing, or so it
+would appear at a glance, because a tree-based parser cannot hold the whole
+parse tree in memory at the same time. JavaXMLFrag allows XML to be parsed by
+event-based approach from the top, but allowing switching to a tree-based
+approach for small structures. So for example a database dump containing
+billion objects can be parsed in an event-based manner but each object can be
+parsed into a tree.</p>
+
+<h2>javafastcomplex</h2>
+
+<p><a href="https://github.com/jmtilli/javafastcomplex">javafastcomplex in Github</a>, <a href="https://jmtilli.github.io/javafastcomplexjavadoc">javafastcomplex documentation</a></p>
+
+<p>Javafastcomplex implements two complex number classes, Complex for immutable
+complex numbers and ComplexBuffer for mutable complex numbers. Both immutable
+and mutable complex numbers share the same common ComplexNumber interface. This
+is unlike other available complex number classes that typically only offer an
+immutable complex number class. Using the mutable complex number class reduces
+object creation and garbage collection overhead which allows trivially to
+improve the performance of Java code that does complex number calculations.</p>
+
 </body></html>
