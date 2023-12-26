@@ -13,6 +13,26 @@ own.</p>
 
 <img src="picture.jpg" alt="Photo of Juha-Matti Tilli" width="288" height="288" />
 
+<h2>RLCTrans</h2>
+
+<p><a href="https://github.com/jmtilli/rlctrans">RLCTrans in Github</a></p>
+
+<p>RLCTrans is a transient simulator program for R-L-C circuits with switches
+and diodes and voltage sources. Also one transformer per circuit with arbitrary
+number of secondary windings is supported. The analysis is linear nodal
+analysis with automatic reanalyses if diode current direction changes. The
+single transformer is handled by binary search which slows down the simulation
+markedly. The software is especially intended for designing control algorithms
+for switched mode power supplies, sine wave inverters and active power factor
+correction circuits and analyzing what kind of core is needed for the inductors
+to avoid saturation. For analyzing energy efficiency of SMPS, the software is
+utterly inadequate. The software does not aim to compete with Spice: it only
+simulates the high-power path of MOSFET and BJT switches and does not analyze
+the gate/base control of the switches at all. However, most likely in many
+cases the software runs way faster than Spice does, and it is easy to integrate
+it with C code which you would use as the programming language of choice for
+developing software running on the control microcontrollers anyway.</p>
+
 <h2>nodexmlfrag</h2>
 
 <p><a href="https://github.com/jmtilli/nodexmlfrag">nodexmlfrag in
