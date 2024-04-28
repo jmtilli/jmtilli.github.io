@@ -13,6 +13,23 @@ own.</p>
 
 <img src="picture2.jpg" alt="Photo of Juha-Matti Tilli" width="288" height="288" />
 
+<h2>CamFTPD</h2>
+
+<p><a href="https://github.com/jmtilli/camftpd">CamFTPD in Github</a></p>
+
+<p>CamFTPD is an FTP server intended for surveillance cameras. The only
+operation it supports is putting new files, it doesn't support getting files,
+deleting files, listing files, etc. The put operation refuses to overwrite
+existing files. So the surveillance camera can only append new data, never
+access or destroy old data. The reasoning why CamFTPD should be used is that
+FTP sends cleartext passwords over the wire, and there is no widely supported
+replacement standard for FTP although SFTP/SCP could be used if surveillance
+cameras only supported it. So, if the attacker can physically access the
+network connection of a surveillance camera, the only harm the attacker can do
+is inserting false evidence. However, prior to the timestamps of the false
+evidence, the attacker's true face has already been caught while tampering with
+the network connection.</p>
+
 <h2>RLCTrans</h2>
 
 <p><a href="https://github.com/jmtilli/rlctrans">RLCTrans in Github</a></p>
