@@ -1,0 +1,431 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Chapter 13. Programming Stirmake with Amyplan</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="home" href="index.html" title="Scalable true implementation of recursive make (stirmake), user's guide" /><link rel="up" href="pt04.html" title="Part IV. Advanced stirmake programming" /><link rel="prev" href="pt04.html" title="Part IV. Advanced stirmake programming" /><link rel="next" href="ch14.html" title="Chapter 14. Advanced tricks" /></head><body><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter 13. Programming Stirmake with Amyplan</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="pt04.html">Prev</a> </td><th width="60%" align="center">Part IV. Advanced stirmake programming</th><td width="20%" align="right"> <a accesskey="n" href="ch14.html">Next</a></td></tr></table><hr /></div><div class="chapter"><div class="titlepage"><div><div><h2 class="title"><a id="programmingwithamyplan"></a>Chapter 13. Programming Stirmake with Amyplan</h2></div></div></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="ch13.html#idp37">abce and Amyplan</a></span></dt><dt><span class="sect1"><a href="ch13.html#idp38">Installing Amyplan in abce</a></span></dt><dt><span class="sect1"><a href="ch13.html#idp39">Creating Amyplan scripts</a></span></dt><dt><span class="sect1"><a href="ch13.html#idp40">No read/eval/print loop (REPL)</a></span></dt><dt><span class="sect1"><a href="ch13.html#idp41">Immutable strings and mutable packet buffers</a></span></dt><dt><span class="sect1"><a href="ch13.html#idp42">I/O streams and interacting with them</a></span></dt><dt><span class="sect1"><a href="ch13.html#idp43">Mathematical functions and floating-point numbers</a></span></dt><dt><span class="sect1"><a href="ch13.html#idp44">JSON</a></span></dt></dl></div>
+    
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp37"></a>abce and Amyplan</h2></div></div></div>
+      
+<p>
+
+Amyplan is the embedded programming language available in stirmake. On the
+other hand, abce is the bytecode engine that contains the reference
+implementation of Amyplan. abce is linked into stirmake during build.
+
+</p><p>
+
+The specialty of Amyplan is that it is offered as an embeddable Yacc grammar,
+easy to include in the larger Yacc grammar of stirmake. The only tokens Amyplan
+requires are some standard operators that are very similar to what C and many
+other languages have, and all variables start with sigil $ and all builtins
+start with sigil @. So the requirements that Amyplan places on the lexer are
+not big.
+
+</p><p>
+
+Amyplan contains both reference counting and garbage collection. Usually, it
+relies on reference counting but if circular data structures are created,
+sometimes it may do a garbage collection run. The garbage collector is mark and
+sweep. Amyplan does not have any special multithreading support, as it is
+expected that it runs in a single thread and the caller may or may not use
+multithreading to call abce functions.
+
+</p><p>
+
+One specialty of Amyplan is support for recursive nested scoping in the main
+implementation abce. Amyplan supports also both lexical and dynamic scoping.
+This is the specialty that is crucial to stirmake, and that is not supported
+for example by Lua.
+
+</p><p>
+
+abce has a stable bytecode format, so Amyplan programs compiled to bytecode
+can be guaranteed to work in the future as well. However, in most use cases,
+bytecode is not stored to disk, but rather Amyplan files are compiled to
+bytecode prior to execution. The bytecode interpreter is a pure interpreter
+and has no support for JIT compilation.
+
+</p><p>
+
+Unlike Lua which has a single table data type that is used to support both
+normal arrays and associative arrays, abce has separate data types for normal
+and associative arrays. The important feature here is that Lua due to the same
+data type cannot distinguish between empty array and and empty associative
+array and thus is incapable of representing JSON, but Amyplan can and has
+native JSON support as a benefit.
+
+</p><p>
+
+Amyplan contains the following data types:
+</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc"><p>@nil</p></li><li class="listitem" style="list-style-type: disc"><p>For internal use only: instruction pointer register value</p></li><li class="listitem" style="list-style-type: disc"><p>For internal use only: base pointer register value</p></li><li class="listitem" style="list-style-type: disc"><p>Function address</p></li><li class="listitem" style="list-style-type: disc"><p>Boolean</p></li><li class="listitem" style="list-style-type: disc"><p>Double-precision IEEE 754 floating point number (used for integers too)</p></li><li class="listitem" style="list-style-type: disc"><p>Red-back tree from strings to arbitrary objects</p></li><li class="listitem" style="list-style-type: disc"><p>Scope</p></li><li class="listitem" style="list-style-type: disc"><p>Array</p></li><li class="listitem" style="list-style-type: disc"><p>String (immutable)</p></li><li class="listitem" style="list-style-type: disc"><p>Packet buffer (mutable)</p></li><li class="listitem" style="list-style-type: disc"><p>I/O stream</p></li></ul></div><p>
+
+</p><p>
+
+The typing in abce and Amyplan is strong and dynamic. Many operations support
+only a single data type: for example, accessing elements in arrays, trees,
+strings and packet buffers all use a different syntax.
+
+</p><p>
+
+abce bytecode is always used with compatible object cache. A bytecode can only
+be executed along with its object cache. Object cache can e.g. contain string
+constants or any other objects, indexed by an integer offset.
+
+</p><p>
+
+The Amyplan compiler simply emits abce bytecode for the construct it sees. It
+has no optimization passes: it is a single pass compiler which emits bytecode
+as it sees tokens.
+
+</p>
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp38"></a>Installing Amyplan in abce</h2></div></div></div>
+      
+<p>
+
+Although stirmake contains Amyplan with it, if you install stirmake, the
+amyplan interpreter is not installed. To install the Amyplan interpreter,
+you must separately clone abce and install it:
+
+</p><pre class="programlisting">
+git clone https://github.com/Aalto5G/abce
+cd abce
+smka
+./install.sh
+</pre><p>
+
+...and optionally, if the installation is to /usr/local:
+</p><pre class="programlisting">
+sudo ./install.sh /usr/local
+</pre><p>
+
+Now amyplan can be executed with the command amyplan file.amy.
+
+</p>
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp39"></a>Creating Amyplan scripts</h2></div></div></div>
+      
+<p>
+
+Amyplan code outside of functions is not executed. The way Amyplan code is
+executed is that there needs to be a function named $main, with $argv and $env
+as argument giving the command-line arguments and environment variables:
+
+</p><pre class="programlisting">
+#!/usr/bin/env amyplan
+
+@function $main($argv,$env)
+  @locvar $i = @nil
+  @locvar $key = @nil
+  @locvar $val = @nil
+  @for($i = 0, $i &lt; $argv[], $i = $i + 1)
+    @dump($argv[$i])
+  @endfor
+  @fordict $key, $val ($env)
+    @dump($key . "=" . $val)
+  @endfor
+  @exit(5)
+  @return 0
+@endfunction
+</pre><p>
+
+This example code prints arguments and environment, and exits with the status 5
+in the middle of the $main function.
+
+</p>
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp40"></a>No read/eval/print loop (REPL)</h2></div></div></div>
+      
+<p>
+
+One thing that Amyplan does not have but other scripting languages like Python
+and Lua have, is read/eval/print loop (REPL). The reason it's missing from
+Amyplan is that Amyplan parser is written in Yacc, and support of
+read/eval/print loop due to this architectural choice is difficult. For
+example, if someone writes @while($x) into a single command line in REPL,
+Amyplan would need to know how many lines to read until the entire @while loop
+is terminated with @endwhile. This would be maybe possible but difficult
+architecturally.
+
+</p><p>
+
+So Amyplan is somewhat similar to Perl: there is no pretty repl utility, and
+the usual way it is run is to create scripts and execute them with the
+interpreter.
+
+</p>
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp41"></a>Immutable strings and mutable packet buffers</h2></div></div></div>
+      
+<p>
+
+Amyplan supports two data types that can be used to represent character strings
+and binary data too, since there is no limitation that a string cannot contain
+the NUL character. The data types are strings and packet buffers.
+
+</p><p>
+
+String and packet buffers differ in their mutability. Strings are always
+immutable and therefore can be used as keys in a tree, whereas packet buffers
+are mutable.
+
+</p><p>
+
+Strings can be converted to packet buffers and packet buffers can be converted
+to strings with @str2pb and @pb2str:
+</p><pre class="programlisting">
+#!/usr/bin/env amyplan
+
+@function $main($argv,$env)
+  @locvar $str = "foobar"
+  @locvar $pb = @str2pb($str)
+  @locvar $str2 = @pb2str($pb, 0, $pb{@})
+  @dump($str2)
+  @return 0
+@endfunction
+</pre><p>
+
+Note how @pb2str requires specifying the bounds, and that $pb{@} gives the
+length of the packet buffer.
+
+</p><p>
+
+Packet buffers can be created with @pbnew and you can assign into its length,
+and you can access the individual bytes:
+
+</p><pre class="programlisting">
+#!/usr/bin/env amyplan
+
+@function $main($argv,$env)
+  @locvar $pb = @pbnew()
+  @locvar $str2 = @nil
+  $pb{@} = 5
+  $pb{@0,@be8} = ('A')[@0]
+  $pb{@1,@be8} = ('B')[@0]
+  $pb{@2,@be8} = ('C')[@0]
+  $pb{@3,@be8} = ('D')[@0]
+  $pb{@4,@be8} = ('E')[@0]
+  $str2 = @pb2str($pb, 0, $pb{@})
+  @dump($str2)
+  @return 0
+@endfunction
+</pre><p>
+
+This sets the fields in packet buffer with width of 8 bits (big-endian but that
+doesn't matter since little-endian and big-endian 8 bits are equal). Wider
+fields can be accessed with @be16, @le16, @be32 and @le32. Similarly, it is
+possible to get fields as opposed to setting them by having the field access on
+the right-hand side of an assigment expression.
+
+</p>
+
+      
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp42"></a>I/O streams and interacting with them</h2></div></div></div>
+      
+<p>
+
+Stirmake supports reading and writing files. The data to write has to be in
+a packet buffer, and the bounds are specified. For example, the following code
+writes JSON into a file
+
+</p><pre class="programlisting">
+#!/usr/bin/env amyplan
+
+@function $main($argv,$env)
+  @locvar $json = {"a": [1,2,3,@nil,@false,"foo"], "b": @false, "c": 4.5, "d": @nil}
+  @locvar $f = @fopen("json.txt", "w")
+  @locvar $pb = @str2pb(@jsonenc($json))
+  @fwrite($f, $pb, 0, $pb{@})
+  @return 0
+@endfunction
+</pre><p>
+
+Here the supported file modes are the same that fopen in C supports: r, r+, w,
+w+, a, a+, rb, r+b, wb, w+b, ab, a+b.
+
+</p><p>
+
+The following code reads the JSON back:
+
+</p><pre class="programlisting">
+#!/usr/bin/env amyplan
+
+@function $main($argv,$env)
+  @locvar $f = @fopen("json.txt", "r")
+  @locvar $pb = @pbnew()
+  @dump(@fgetdelim($f, @nil, $pb, 0, @nil))
+  @dump(@pb2str($pb, 0, $pb{@}))
+  @dump(@jsondec(@pb2str($pb, 0, $pb{@})))
+  @return 0
+@endfunction
+</pre><p>
+
+The first argument is the I/O stream, the second is the delimiter, a string of
+size 1, usually "\n" or @nil if you want to read everything, then the packet
+buffer, the offset inside that packet buffer, and the maximum number of bytes
+to read or @nil if you want to read everything. If the packet buffer was not
+initially empty, it may be longer than what was read; in this case, the return
+value of @fgetdelim can be used to determine how many bytes were read.
+
+</p><p>
+
+The file will be closed whenever it goes out of scope (causing reference
+counting to destroy it), but it is possible to close it earlier with @fclose:
+
+</p><pre class="programlisting">
+#!/usr/bin/env amyplan
+
+@function $main($argv,$env)
+  @locvar $f = @fopen("json.txt", "r")
+  @locvar $pb = @pbnew()
+  @dump(@fgetdelim($f, @nil, $pb, 0, @nil))
+  @fclose($f)
+  @dump(@pb2str($pb, 0, $pb{@}))
+  @dump(@jsondec(@pb2str($pb, 0, $pb{@})))
+  @return 0
+@endfunction
+</pre><p>
+
+It is also possible to read content from I/O stream using @fread as opposed to
+@fgetdelim, but in most applications @fgetdelim is expected to be better.
+@fread does not take a delimiter so reading exactly one line isn't possible.
+@fread also requires maximum read size and you cannot specify @nil there. Also,
+@fread does not grow the packet buffer automatically, so you have to grow it
+before the read operation, and maybe shrink it after the read is done. Example
+of @fread:
+
+</p><pre class="programlisting">
+#!/usr/bin/env amyplan
+
+@function $main($argv,$env)
+  @locvar $f = @fopen("json.txt", "r")
+  @locvar $pb = @pbnew()
+  @locvar $bytes_read = @nil
+  $pb{@} = 8192
+  $bytes_read = @fread($f, $pb, 0, 8192)
+  $pb{@} = $bytes_read
+  @fclose($f)
+  @dump(@pb2str($pb, 0, $pb{@}))
+  @dump(@jsondec(@pb2str($pb, 0, $pb{@})))
+  @return 0
+@endfunction
+</pre><p>
+
+You can also seek in I/O streams using @fseek. It takes three arguments: I/O
+stream, offset and whence, in this order. Whence 0 is absolute indexing, whence
+1 is indexing from current position (negative indices permitted), whence 2 is
+indexing from end (negative index or zero mandatory). It returns the absolute
+position from start. Example:
+
+</p><pre class="programlisting">
+#!/usr/bin/env amyplan
+
+@function $main($argv,$env)
+  @locvar $f = @fopen("json.txt", "r")
+  @locvar $pb1 = @pbnew()
+  @locvar $pb2 = @pbnew()
+  @locvar $bytes_read = @nil
+  $pb1{@} = 8192
+  $bytes_read = @fread($f, $pb1, 0, 8192)
+  $pb1{@} = $bytes_read
+  @dump(@fseek($f, 0, 0))
+  @fgetdelim($f, @nil, $pb2, 0, @nil)
+  @fclose($f)
+  @dump(@jsondec(@pb2str($pb1, 0, $pb1{@})))
+  @dump(@jsondec(@pb2str($pb2, 0, $pb2{@})))
+  @return 0
+@endfunction
+</pre><p>
+
+This code seeks into absolute offset 0 to read the same data again using a
+different function to read it. The dump of position is in this case zero.
+
+</p>
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp43"></a>Mathematical functions and floating-point numbers</h2></div></div></div>
+      
+<p>
+
+Stirmake contains a comprehensive suite of basic mathematical functions. For
+example, trigonometry, square root and exponentiation and logarithms are
+supported:
+
+</p><pre class="programlisting">
+#!/usr/bin/env amyplan
+
+@function $main($argv,$env)
+  @dump(@sin(30*3.14159265358979/180))
+  @dump(@asin(@sin(30*3.14159265358979/180))*180/3.14159265358979)
+  @dump(@cos(60*3.14159265358979/180))
+  @dump(@acos(@cos(60*3.14159265358979/180))*180/3.14159265358979)
+  @dump(@tan(45*3.14159265358979/180))
+  @dump(@atan(@tan(45*3.14159265358979/180))*180/3.14159265358979)
+  @dump(@sqrt(25))
+  # 5 to the power 5, approximately, not accurate integer:
+  @dump(@exp(5*@log(5)))
+  @dump(@ceil(0.6))
+  @dump(@floor(0.6))
+  @dump(@round(0.6))
+  @dump(@trunc(0.6))
+  @dump(@abs(-0.25))
+  @return 0
+@endfunction
+</pre><p>
+
+It is also possible to classify numbers using @fpclassify:
+
+</p><pre class="programlisting">
+#!/usr/bin/env amyplan
+
+@function $main($argv,$env)
+  @dump(@fpclassify(0)) # zero
+  @dump(@fpclassify(1e-310)) # subnormal
+  @dump(@fpclassify(5)) # normal
+  @dump(@fpclassify(1.0/0.0)) # infinite
+  @dump(@fpclassify(0.0/0.0)) # NaN
+  @return 0
+@endfunction
+</pre><p>
+
+</p>
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp44"></a>JSON</h2></div></div></div>
+      
+<p>
+
+Thanks to the typing system of Amyplan, supporting JSON is easy. There are two
+functions, @jsondec and @jsonenc. Note that the JSON is represented as a
+string, not as a packet buffer.
+
+</p><p>
+
+Here's how to encode JSON:
+
+</p><pre class="programlisting">
+#!/usr/bin/env amyplan
+
+@function $main($argv,$env)
+  @locvar $struct = {'a': [1,2,3], 'b': @nil, 'c': @false, 'd': 'string'}
+  @dump(@jsonenc($struct))
+  @return 0
+@endfunction
+</pre><p>
+
+Note how the JSON contains pretty-printing with spaces and newlines, but the
+@dump command prints it as a string, with newlines as \n.
+
+</p><p>
+
+It is also possible to decode JSON:
+
+</p><pre class="programlisting">
+#!/usr/bin/env amyplan
+
+@function $main($argv,$env)
+  @locvar $json = '{"a": [1,2,3], "b": null, "c": false, "d": "string"}'
+  @dump(@jsondec($json))
+  @return 0
+@endfunction
+</pre><p>
+
+</p>
+    </div>
+  </div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="pt04.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="pt04.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ch14.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Part IV. Advanced stirmake programming </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Chapter 14. Advanced tricks</td></tr></table></div></body></html>

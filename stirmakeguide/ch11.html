@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Chapter 11. Scoping and subdirectories</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="home" href="index.html" title="Scalable true implementation of recursive make (stirmake), user's guide" /><link rel="up" href="pt03.html" title="Part III. Stirmake in large-scale systems" /><link rel="prev" href="ch10.html" title="Chapter 10. Make revolution, one project at a time" /><link rel="next" href="ch12.html" title="Chapter 12. Example large or complex projects" /></head><body><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter 11. Scoping and subdirectories</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch10.html">Prev</a> </td><th width="60%" align="center">Part III. Stirmake in large-scale systems</th><td width="20%" align="right"> <a accesskey="n" href="ch12.html">Next</a></td></tr></table><hr /></div><div class="chapter"><div class="titlepage"><div><div><h2 class="title"><a id="scopingandsubdirectories"></a>Chapter 11. Scoping and subdirectories</h2></div></div></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="ch11.html#lexdyn">Lexical and dynamic scoping</a></span></dt><dt><span class="sect1"><a href="ch11.html#creatingscopes">Creating new scopes, and holey scopes</a></span></dt><dt><span class="sect1"><a href="ch11.html#namedscopes">Named scopes and accessing them</a></span></dt><dt><span class="sect1"><a href="ch11.html#dirupdirdown">Specifying library lists that work everywhere</a></span></dt></dl></div>
+    
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="lexdyn"></a>Lexical and dynamic scoping</h2></div></div></div>
+      
+<p>
+
+Some programming languages are lexically scoped. Others are dynamically scoped.
+The programming language of stirmake, Amyplan, supports both scoping types.
+
+An example of lexical scoping can be made as follows. Let us assume there are
+two nested directories, scoping and scoping/subdir. Both of them contain a
+Stirfile, scoping/Stirfile:
+</p><pre class="programlisting">
+@toplevel
+@strict
+
+@phonyrule: 'all':
+
+$VAR = 1
+
+@function $FN()
+  @dump("---")
+  @dump(@L$VAR)
+  @dump(@D$VAR)
+@endfunction
+
+@call $FN()
+@dirinclude "subdir"
+</pre><p>
+...and scoping/subdir/Stirfile:
+</p><pre class="programlisting">
+@subfile
+@strict
+
+@phonyrule: 'all':
+
+$VAR = 2
+
+@call $FN()
+</pre><p>
+
+In this case, the Stirfile system execution with smka prints:
+</p><pre class="programlisting">
+stirmake: Using directory /home/YOURUSERNAME/scoping
+"---"
+1
+1
+"---"
+1
+2
+stirmake: Nothing to be done.
+</pre><p>
+
+So lexical scoping accesses the variable where the function was defined.
+Dynamic scoping accesses the variable where the function was called.
+
+</p><p>
+
+Six other scoping specifiers are:
+</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc"><p>@LP: lexical parent scope</p></li><li class="listitem" style="list-style-type: disc"><p>@LO: lexical scope without recursion to parent</p></li><li class="listitem" style="list-style-type: disc"><p>@LPO: lexical parent scope without recursion to grandparent</p></li><li class="listitem" style="list-style-type: disc"><p>@DP: dynamic parent scope</p></li><li class="listitem" style="list-style-type: disc"><p>@DO: dynamic scope without recursion to parent</p></li><li class="listitem" style="list-style-type: disc"><p>@DPO: dynamic parent scope without recursion to grandparent</p></li></ul></div><p>
+
+It is also possible to use immediate evaluation:
+</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc"><p>@I: immediate scope</p></li><li class="listitem" style="list-style-type: disc"><p>@IO: immediate scope without recursion to parent</p></li><li class="listitem" style="list-style-type: disc"><p>@IP: immediate parent scope</p></li><li class="listitem" style="list-style-type: disc"><p>@IPO: immediate parent scope without recursion to grandparent</p></li></ul></div><p>
+
+Immediate evaluation accesses the variable immediately, with no future
+changes applied. Example:
+</p><pre class="programlisting">
+@toplevel
+@strict
+
+@phonyrule: 'all':
+
+$VAR = 1
+
+@function $FN()
+  @dump(@L$VAR)
+  @dump(@I$VAR)
+@endfunction
+
+$VAR = 2
+
+@call $FN()
+</pre><p>
+
+This prints:
+</p><pre class="programlisting">
+2
+1
+stirmake: Nothing to be done.
+</pre><p>
+
+Note how the immediate access captures the variable immediately at parsing
+time, with no future changes applied. In contrast, lexical access uses the
+scope of function definition (lexical scoping), but latest variable within that
+scope.
+
+</p>
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="creatingscopes"></a>Creating new scopes, and holey scopes</h2></div></div></div>
+      
+<p>
+
+It is possible to create scopes with @beginscope and @endscope. For example:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all': 'thisscope' 'subscope'
+
+$VAR = ["a"]
+
+@beginscope
+$VAR += ["b"]
+@phonyrule: 'subscope':
+@	["echo", @$VAR]
+@endscope
+
+@phonyrule: 'thisscope':
+@	["echo", @$VAR]
+</pre><p>
+
+In this case, there are two rules, 'thisscope' and 'subscope' which are in
+different scopes. Both rules print their idea of $VAR, which is different due
+to scoping. This Stirfile prints:
+</p><pre class="programlisting">
+stirmake: Using directory /home/YOURUSERNAME/beginscope
+[., subscope] echo a b
+a b
+[., thisscope] echo a
+a
+</pre><p>
+
+</p><p>
+
+Also, holey scopes were demonstrated already, but re-demonstrating them is
+relevant in this section again. Holey scope is a scope where implicit recursion
+to parent scope is not present, but you can always access the lexical parent
+scope explicitly with @LP. This provides a convenient way of controlling what
+is present in the sub-scope. Example from Stirfile of stirmake:
+
+</p><pre class="programlisting">
+@beginholeyscope
+  $(CC) = @LP$(CC)
+  $(CFLAGS) = @LP$(CFLAGS)
+  $(WITH_LUA) = @LP$(WITH_LUA)
+  $(LUAINCS) = @LP$(LUAINCS)
+  $(LUALIBS) = @LP$(LUALIBS)
+  $(FLEX) = @LP$(FLEX)
+  $(BYACC) = @LP$(BYACC)
+  @projdirinclude "abce"
+@endscope
+</pre><p>
+
+In this case, the defined variables are visible inside the holey scope (and
+inside the scope of the subproject "abce"), but others are not.
+
+</p>
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="namedscopes"></a>Named scopes and accessing them</h2></div></div></div>
+      
+<p>
+
+Scopes can be named. With @beginscope or @beginholeyscope, it is possible
+to add a name of the created scope:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all': 'thisscope' 'subscope'
+
+$VAR = ["a"]
+
+@beginscope $SCOPE
+$VAR += ["b"]
+@phonyrule: 'subscope':
+@	["echo", @$VAR]
+@endscope
+
+@phonyrule: 'thisscope':
+@	["echo", @$VAR]
+@	["echo", @@SC($SCOPE)$VAR]
+</pre><p>
+
+This prints:
+</p><pre class="programlisting">
+stirmake: Using directory /home/YOURUSERNAME/namedscope
+[., subscope] echo a b
+a b
+[., thisscope] echo a
+a
+[., thisscope] echo a b
+a b
+</pre><p>
+
+Note how in @@SC the first @ means "include the whole list into the array", and
+the second @ is part of the specifier @SC of accessing named scopes. Also
+instead of @SC you can use @SCO to prevent recursion to the parent of the named
+scope.
+
+</p><p>
+
+With @dirinclude and @projdirinclude, you specify the scope with @scopename:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all': 'thisscope'
+
+$VAR = ["a"]
+
+@dirinclude @scopename $SCOPE "subdir"
+
+@phonyrule: 'thisscope':
+@	["echo", @$VAR]
+@	["echo", @@SC($SCOPE)$VAR]
+</pre><p>
+
+...and the subdir/Stirfile:
+</p><pre class="programlisting">
+@subfile
+@strict
+@phonyrule: 'all':
+$VAR += ["b"]
+</pre><p>
+
+...which prints:
+</p><pre class="programlisting">
+stirmake: Using directory /home/YOURUSERNAME/scopename
+[., thisscope] echo a
+a
+[., thisscope] echo a b
+a b
+</pre><p>
+
+</p><p>
+
+Note that @dirinclude can be used to include several directories in one line
+by having an array, but this does not work with @scopename. When @scopename is
+specified, only one included directory per line is permitted.
+
+</p>
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="dirupdirdown"></a>Specifying library lists that work everywhere</h2></div></div></div>
+      
+<p>
+
+All stirmake commands are executed in the directory where the rule was created.
+It is possible to refer to files and directories inside parent directories with
+.. entries. For example, if you have directory prog/prog1/ and library
+lib/libcommon.a, inside the prog/prog1/ directory you would refer to this as:
+'../../lib/libcommon.a'.
+
+</p><p>
+
+However, sometimes changes will be made to the directory structures. An example
+is where prog/prog1/ is moved to prog1/ directly on the top-level directory. In
+this case, the '../../lib/libcommon.a' would fail and need to be modified to
+'../lib/libcommon.a'. Clearly, this kind of approach is not maintainable.
+
+</p><p>
+
+There are four special directory built-ins that are helpful in managing path
+strings. They are @dirdownall and @dirupall, and @dirdown and @dirup. The first
+two give paths to/from the root of the project structure, the last two give
+paths to/from the root of the current project.
+
+</p><p>
+
+For example, inside prog/prog1 you may instead of '../../lib/libcommon.a' use
+@dirupall . '/lib/libcommon.a'. In this case, @dirupall gives the relative path
+to the top-level directory of the entire project structure. This way, it is
+possible for example in the top-level Stirfile to add this variable function
+with delayed evaluation:
+
+</p><pre class="programlisting">
+$LIBCOMMON&lt;&gt; = @dirupall . '/lib/libcommon.a'
+</pre><p>
+
+If this function is evaluated as $LIBCOMMON&lt;&gt; in any subdirectory, it
+gives the correct path to libcommon.a.
+
+</p><p>
+
+Also it is possible in sub-Stirfile lib/Stirfile to add this:
+</p><pre class="programlisting">
+$DIRDOWN = @dirdownall
+$LIBCOMMON&lt;&gt; = @dirupall . '/' . @L$DIRDOWN . '/libcommon.a'
+</pre><p>
+
+Note the usage of lexical scoping to evaluate $DIRDOWN, so that the @dirdownall
+from top-level diretory to lib directory is always used, not to the directory
+where the caller is present.
+
+</p><p>
+
+Then in the top-level Stirfile you would have:
+</p><pre class="programlisting">
+@dirinclude @scopename $LIBSC "lib"
+$LIBCOMMON = @SC($LIBSC) $LIBCOMMON
+@dirinclude "prog"
+</pre><p>
+
+Then any Stirfile inside prog can use $LIBCOMMON&lt;&gt; which gives the
+correct path to libcommon.a.
+
+</p><p>
+
+This way, library linking with relative paths is easy. Also it is possible to
+use the same way to construct include directory arguments to C compiler (-I
+argument).
+
+</p>
+    </div>
+  </div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch10.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="pt03.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ch12.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter 10. Make revolution, one project at a time </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Chapter 12. Example large or complex projects</td></tr></table></div></body></html>

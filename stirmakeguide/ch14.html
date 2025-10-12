@@ -1,0 +1,797 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Chapter 14. Advanced tricks</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="home" href="index.html" title="Scalable true implementation of recursive make (stirmake), user's guide" /><link rel="up" href="pt04.html" title="Part IV. Advanced stirmake programming" /><link rel="prev" href="ch13.html" title="Chapter 13. Programming Stirmake with Amyplan" /></head><body><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter 14. Advanced tricks</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch13.html">Prev</a> </td><th width="60%" align="center">Part IV. Advanced stirmake programming</th><td width="20%" align="right"> </td></tr></table><hr /></div><div class="chapter"><div class="titlepage"><div><div><h2 class="title"><a id="advancedtricks"></a>Chapter 14. Advanced tricks</h2></div></div></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="ch14.html#idp45">Order-only dependencies</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp46">Separate build directory</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp47">Pattern rules</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp48">Scopes stored in variables</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp49">Function data types and builtin wrappers</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp50">@deponly for additional dependencies</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp51">@order and @wait</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp52">Dynamically adding dependencies</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp53">Dynamically adding rules</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp54">Finding stirmake version and version history</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp55">Version conditionals and minimum version requirements, future builtins</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp56">Hacking abce</a></span></dt></dl></div>
+    
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp45"></a>Order-only dependencies</h2></div></div></div>
+      
+<p>
+
+The modification timestamp of directories is always modified whenever new files
+are created in that directory, but not when new files are created in some
+subdirectory of that directory. Also creation of files can change the size of
+the directory on the disk. For these reasons, it is not good idea to depend on
+a directory. Usually you want to depend on either of two things: (1) last
+modification time recursively inside the directory, or (2) the existence of the
+directory.
+
+</p><p>
+
+For example, if you want to store compiled object files into directory "build"
+at the same level as the source files, the directory may not already exist. So
+any rule to compile sources into objects in that directory should depend on the
+existence of the directory, with a rule to create the directory if it doesn't
+exist. It is achieved like this:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+$SRCS = ["test.c"]
+$OBJS = @presuball(@sufsuball($SRCS, ".c", ".o"), "", "build/")
+
+@phonyrule: 'all': $OBJS
+
+@patrule: $OBJS: "build/%.o": "%.c" @orderonly "build"
+@	["cc", "-c", "-o", $@, $&lt;]
+
+"build":
+@	["mkdir", "-p", $@]
+</pre><p>
+
+This Stirfile compiles test.c into build/test.o, creating the directory if it
+doesn't exist. The command to create build directory is not executed again if
+the timestamp of the build directory changes. Also, if the timestamp of the
+build directory changes, no object file is rebuilt because it is an order-only
+dependency.
+
+</p>
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp46"></a>Separate build directory</h2></div></div></div>
+      
+<p>
+
+Usually stirmake is used to build the object and binary files and libraries to
+the same directory where sources are. With make, a separate build directory is
+often used. The reasoning may be that with make, "make clean" is manually
+maintained and therefore the rules to clean may left an uncleaned mess.
+However,with stirmake cleaning rules are automatic so it's easy to do a full
+clean, if needed (with stirmake it's generally not needed whereas with make,
+"make clean" is the standard tool to debug build system issues).
+
+</p><p>
+
+Of course, stirmake supports separate build directory too. It can be beside the
+source files, or it can be a separate directory at the project root. The latter
+is achieved with @dirup and @dirdown (which are preferable to @dirupall and
+@dirdownall here since @dirup and @dirdown give paths relative to project root,
+whereas @dirupall and @dirdownall could create a path to entire project
+structure root which may be a different project).
+
+</p><p>
+
+How to do a separate build directory is presented here. First the top-level
+Stirfile:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all': 'src/all'
+@dirinclude "src"
+</pre><p>
+...then the sub-Stirfile src/Stirfile:
+</p><pre class="programlisting">
+@subfile
+@strict
+$SRCS = ["test.c"]
+$OBJS = @presuball(@sufsuball($SRCS, ".c", ".o"), "", @dirup . "/build/" . @dirdown . "/")
+$DEPS = @sufsuball($OBJS, ".o", ".d")
+
+@phonyrule: 'all': $OBJS
+
+(@dirup . "/build/" . @dirdown):
+@	["mkdir", "-p", $@]
+
+@patrule: $OBJS: (@dirup . "/build/" . @dirdown . "/%.o") \
+                 (@dirup . "/build/" . @dirdown . "/%.d"): \
+                     "%.c" @orderonly (@dirup . "/build/" . @dirdown)
+@	["cc", "-c", "-o", $@, $&lt;]
+@	["cc", "-MM", "-MT", $@, "-o", @sufsubone($@, ".o", ".d"), $&lt;]
+
+@cdepincludes @ignore @autophony @autotarget $DEPS
+</pre><p>
+
+Note how the parentheses can be used to add entire expressions to give target
+and dependency names. Note also how @presuball was used with empty prefix to
+add a string prefix to all array entries.
+
+</p>
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp47"></a>Pattern rules</h2></div></div></div>
+      
+<p>
+
+Pattern rules have been mentioned numerous times in the examples of this
+stirmake guide. However, it is important here to document their semantics.
+
+</p><p>
+
+Firstly, pattern rules always have to have a list of bases to instantiate them.
+Bases are compared to the first pattern in the target list. The first pattern
+in the target list must contain exactly one percent sign, which is treated as a
+wildcard. The second and further targets in the target list must also contain
+exatly one percent sign, but the difference is that the contents of the percent
+sign are taken from its use as a wildcard in the first target.
+
+</p><p>
+
+Dependencies may or may not have the wildcard. If a dependency has the
+wildcard, it must have exactly one of it, too, but having zero is permitted.
+
+</p><p>
+
+Patrule may also be a distrule, which can be noted in this example snippet
+of stirmake Stirfile:
+
+</p><pre class="programlisting">
+@patrule @distrule: $(PROG): '%': '%.o' 'libstirmake.a' 'abce/libabce.a'
+@	[@$(CC), @$(CFLAGS), "-o", $@, $&lt;, 'libstirmake.a', 'abce/libabce.a', @$(LUALIBS), '-lm', '-ldl']
+</pre><p>
+
+If a patrule is distrule, then it is cleaned along with binaries (smka -b), in
+the default case it is cleaned along with object files (smka -c).
+
+</p><p>
+
+Expressions can be included in targets or dependencies with parentheses, as
+is evident from this example snippet from the previous section:
+
+</p><pre class="programlisting">
+@patrule: $OBJS: (@dirup . "/build/" . @dirdown . "/%.o") \
+                 (@dirup . "/build/" . @dirdown . "/%.d"): \
+                     "%.c" @orderonly (@dirup . "/build/" . @dirdown)
+@	["cc", "-c", "-o", $@, $&lt;]
+@	["cc", "-MM", "-MT", $@, "-o", @sufsubone($@, ".o", ".d"), $&lt;]
+</pre><p>
+
+Note that unlike GNU make which supports $* variable, here the second target
+with .d extension is modified by using @sufsubone for the first target. $@ is
+always the first target.
+
+</p>
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp48"></a>Scopes stored in variables</h2></div></div></div>
+      
+<p>
+
+It has already been demonstrated that Stirmake and Amyplan offer both lexical
+and dynamic scoping with @L and @D, respectively. However, it is also possible
+to store scope in a variable and refer to that scope later. An example:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+
+@phonyrule: 'all':
+
+@beginscope $NAMED
+  $X = 5
+@endscope
+
+$ANOTHERREF = $NAMED
+
+@call @dump(@SC($ANOTHERREF)$X)
+</pre><p>
+
+The reference to a named scope is @SC($NAMEOFTHESCOPE), which can be used just
+like @D and @L. So the program prints 5, as you would expect. The scope can be
+passed around as much as you want, in that example it was passed around to a
+second named variable after defining it with the first named variable.
+
+</p>
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp49"></a>Function data types and builtin wrappers</h2></div></div></div>
+      
+<p>
+
+Function is a basic data type in Amyplan. When defining a function, the
+named variable gets a reference to this defined function. The value of
+that variable can be passed around. An example:
+
+</p><pre class="programlisting">
+#!/usr/bin/env amyplan
+
+@function $test($x)
+  @dump($x)
+  @return 0
+@endfunction
+@function $calltest($fnptr, $val)
+  @return $fnptr($val)
+@endfunction
+@function $main($argv, $env)
+  @locvar $fnptr = @L$test
+  @dump(@L$calltest($fnptr, 5))
+  @return 0
+@endfunction
+</pre><p>
+
+Note that builtins such as @dump are not functions, so you cannot assign the
+value of @dump to some variable. Note however that you can always define a
+function, just like the function $test, the sole purpose of which is to call a
+builtin. So essentially instead of passing around the value of @dump, you pass
+around the value of $test which calls @dump.
+
+</p><p>
+
+Function must always be called with the correct number of arguments. It is an
+error to use an incorrect number of arguments.
+
+</p>
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp50"></a>@deponly for additional dependencies</h2></div></div></div>
+      
+<p>
+
+In stirmake, it is an error to specify the same rule twice with different
+dependency lists. Make happily accepts such constructs, but stirmake does not.
+The reason in stirmake being that the commands to execute and other important
+rule parameters need to be unambiguous.
+
+</p><p>
+
+However, sometimes you may want to add extra dependencies to a rule later, for
+example inside an @if block that may or may not, depending on the environment,
+add the extra dependencies to the rule. This is possible with @deponly:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+
+@phonyrule: 'all': 'test'
+
+'test': 'test.txt'
+@	["touch", $@]
+
+@deponly: 'test': 'test2.txt'
+
+'test.txt':
+@	["touch", $@]
+
+'test2.txt':
+@	["touch", $@]
+</pre><p>
+
+This stirfile touches not only test and test.txt, but also test2.txt, due to
+the extra added dependency, with @deponly.
+
+</p>
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp51"></a>@order and @wait</h2></div></div></div>
+      
+<p>
+
+There are two functionalities stolen from BSD make that control the parallel
+execution of rules. They are @wait and @order.
+
+</p><p>
+
+@wait is added as a specifier before a dependency. Whenever it is added, that
+dependency and anything after it will be executed by the rule only when
+everything before it has been executed. However, this execution order works
+only if the dependencies are not executed by some other rule that doesn't
+have @wait.
+
+</p><p>
+
+An example:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+
+@phonyrule: 'all': 'a' @wait 'b' @wait 'c' @wait 'd'
+@phonyrule: 'nowait': 'a' 'b' 'c' 'd'
+@phonyrule: 'two': 'a' 'b' @wait 'c' 'd'
+
+@phonyrule: 'a':
+        echo a
+@phonyrule: 'b':
+        echo b
+@phonyrule: 'c':
+        echo c
+@phonyrule: 'd':
+        echo d
+</pre><p>
+
+Then it can be observed that @wait does indeed what it's supposed to do:
+</p><pre class="programlisting">
+$ smka -ja
+stirmake: Using directory /home/YOURUSERNAME/wait
+[., a] sh -c echo a
+a
+[., b] sh -c echo b
+b
+[., c] sh -c echo c
+c
+[., d] sh -c echo d
+d
+$ smka -ja nowait
+stirmake: Using directory /home/YOURUSERNAME/wait
+[., d] sh -c echo d
+[., c] sh -c echo c
+[., b] sh -c echo b
+[., a] sh -c echo a
+c
+d
+b
+a
+$ smka -ja two
+stirmake: Using directory /home/YOURUSERNAME/wait
+[., b] sh -c echo b
+[., a] sh -c echo a
+b
+a
+[., d] sh -c echo d
+[., c] sh -c echo c
+d
+c
+</pre><p>
+
+</p><p>
+
+@order is a top-level construct taking two targets which ensures that if
+both targets are built, they are built in the specified order. However, it's
+not a real dependency since if the second target is built but the first is not,
+stirmake @order directive does not add a dependency from the second target to
+the first target.
+
+</p><p>
+
+An example:
+</p><pre class="programlisting">
+@toplevel
+@strict
+
+@phonyrule: 'nowait': 'a' 'b' 'a2' 'b2'
+
+@phonyrule: 'a':
+        echo a
+@phonyrule: 'b':
+        echo b
+@phonyrule: 'a2':
+        echo a2
+@phonyrule: 'b2':
+        echo b2
+
+@order 'b' 'a'
+@order 'a2' 'b2'
+</pre><p>
+
+If this is executed, it gives:
+</p><p>
+</p><pre class="programlisting">
+$ smka
+stirmake: Using directory /home/YOURUSERNAME/order
+[., a2] sh -c echo a2
+a2
+[., b2] sh -c echo b2
+b2
+[., b] sh -c echo b
+b
+[., a] sh -c echo a
+a
+</pre><p>
+
+However, if individual targets are executed separately, there is no rule
+that would make b2 dependent on a2 or a dependent on b:
+</p><pre class="programlisting">
+$ smka a
+stirmake: Using directory /home/YOURUSERNAME/order
+[., a] sh -c echo a
+a
+$ smka b
+stirmake: Using directory /home/YOURUSERNAME/order
+[., b] sh -c echo b
+b
+$ smka a2
+stirmake: Using directory /home/YOURUSERNAME/order
+[., a2] sh -c echo a2
+a2
+$ smka b2
+stirmake: Using directory /home/YOURUSERNAME/order
+[., b2] sh -c echo b2
+b2
+</pre><p>
+
+It is an error if there is circular @order
+</p><pre class="programlisting">
+@toplevel
+@strict
+
+@phonyrule: 'nowait': 'a' 'b' 'a2' 'b2'
+
+@phonyrule: 'a':
+        echo a
+@phonyrule: 'b':
+        echo b
+@phonyrule: 'a2':
+        echo a2
+@phonyrule: 'b2':
+        echo b2
+
+@order 'b' 'a'
+@order 'a' 'b'
+@order 'a2' 'b2'
+</pre><p>
+
+...but the error appears only if both targets are built:
+</p><pre class="programlisting">
+$ smka
+stirmake: Using directory /home/YOURUSERNAME/circularorder
+stirmake: cycle found
+ rule in cycle: ( nowait )
+ rule in cycle: ( a )
+ rule in cycle: ( b )
+stirmake: *** cycle found, cannot proceed further. Exiting.
+$ smka a
+stirmake: Using directory /home/YOURUSERNAME/circularorder
+[., a] sh -c echo a
+a
+$ smka b
+stirmake: Using directory /home/YOURUSERNAME/circularorder
+[., b] sh -c echo b
+b
+$ smka a b
+stirmake: Using directory /home/YOURUSERNAME/circularorder
+stirmake: cycle found
+ rule in cycle: ( a )
+ rule in cycle: ( b )
+stirmake: *** cycle found, cannot proceed further. Exiting.
+</pre><p>
+
+</p>
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp52"></a>Dynamically adding dependencies</h2></div></div></div>
+      
+<p>
+
+There is a tool @adddeps which can be used to add dependencies in Amyplan code.
+Note that dependency addition is not permitted after the rule into which
+dependencies are added has been executed. Dependency addition however is
+permitted at the time when rules are being executed, but the rule into which
+dependencies are added has not yet been executed or been scheduled for
+execution.
+
+</p><p>
+
+The tool to add dependencies takes first the targets used to identify the
+rules into which dependencies are added, secondly the dependencies themselves
+and thirdly a settings tree. The settings tree can contain "rec", "orderonly"
+and "wait". All of the settings have to be booleans.
+
+</p><p>
+
+Note that "rec", "orderonly" and "wait" are applied to all dependencies. If
+you wish to add a dependency with different settings than other dependencies,
+you have to call @adddeps several times with differing "rec", "orderonly" and
+"wait" settings.
+
+</p><p>
+
+An example is this snippet from stirmake Stirfile, which adds dependencies for
+flex/byacc:
+
+</p><pre class="programlisting">
+@function $ADD_LEXX_YACC_DEPS($lex)
+  @locvar $b = @sufsuball($lex, ".l", "")
+  @locvar $i = 0
+  @locvar $c = @nil
+  @for($i = 0, $i &lt; $b[], $i = $i+1)
+    $c = $b[$i]
+    @adddeps([$c.".lex.d", $c.".lex.o", $c.".tab.d", $c.".tab.o"], \
+             [$c.".lex.h", $c.".tab.h"], {})
+  @endfor
+@endfunction
+@call $ADD_LEXX_YACC_DEPS($(LEX_LIB))
+</pre><p>
+
+Here the "rec", "orderonly" and "wait" are default, i.e. false. Also here the
+function is executed during parsing stage with @call. A function can be
+executed after parsing stage if it's called when generating the command names
+and arguments, and in this case it's important that the targets have not been
+executed or scheduled for execution.
+
+</p>
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp53"></a>Dynamically adding rules</h2></div></div></div>
+      
+<p>
+
+In the previous section, it was explained how additional dependencies can be
+added dynamically. In this section, the same dynamic addition is used for
+rules, which is far more complex (more different options etc.) and also cannot
+be done after the execution of rules has begun.
+
+</p><p>
+
+Adding rules only takes one huge structure, a tree. All of the options
+will be present in this tree. The tree can contain these keys:
+
+</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc"><p>"tgts" (array of trees) for targets</p>
+  <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: square; "><li class="listitem" style="list-style-type: square"><p>"name" (string) for target name</p></li><li class="listitem" style="list-style-type: square"><p>"dist" (boolean) for specifying it's binary not object</p></li></ul></div>
+</li><li class="listitem" style="list-style-type: disc"><p>"deps" (array of trees) for dependencies</p>
+  <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: square; "><li class="listitem" style="list-style-type: square"><p>"name" (string) for dependency name</p></li><li class="listitem" style="list-style-type: square"><p>"rec" (boolean) for @recdep dependency</p></li><li class="listitem" style="list-style-type: square"><p>"orderonly" (boolean) for @orderonly dependency</p></li></ul></div>
+</li><li class="listitem" style="list-style-type: disc"><p>"shells" (array of trees) for commands to execute</p>
+  <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: square; "><li class="listitem" style="list-style-type: square"><p>"embed" (boolean) for telling it's array of arrays ("cmds") not array ("cmd")</p></li><li class="listitem" style="list-style-type: square"><p>"cmds" (array of arrays of string, for "embed") or "cmd" (array of string, for no "embed") for telling the command(s) to execute</p></li><li class="listitem" style="list-style-type: square"><p>"isfun" (boolean) for telling the command is function which needs to be called, returning the actual commands</p></li><li class="listitem" style="list-style-type: square"><p>"fun" (function) for telling the function that is called with the following argument (for "isfun")</p></li><li class="listitem" style="list-style-type: square"><p>"arg" (boolean) for telling the function needs to be called with this argument (for "isfun")</p></li><li class="listitem" style="list-style-type: square"><p>"ismake" (boolean) for @ismake command, a sub-GNU-make</p></li><li class="listitem" style="list-style-type: square"><p>"noecho" (boolean) for @noecho command, not to echo command when executing it</p></li><li class="listitem" style="list-style-type: square"><p>"ignore" (boolean) for @ignore command, where return value can be "false-y" (nonzero)</p></li><li class="listitem" style="list-style-type: square"><p>"rec" (boolean) for @recdep dependency</p></li><li class="listitem" style="list-style-type: square"><p>"orderonly" (boolean) for @orderonly dependency</p></li></ul></div>
+</li><li class="listitem" style="list-style-type: disc"><p>"attrs" (tree) for attributes</p>
+  <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: square; "><li class="listitem" style="list-style-type: square"><p>"phony" (boolean) for @phonyrule rules</p></li><li class="listitem" style="list-style-type: square"><p>"rectgt" (boolean) for @rectgtrule rules</p></li><li class="listitem" style="list-style-type: square"><p>"detouch" (boolean) for @detouchrule rules</p></li><li class="listitem" style="list-style-type: square"><p>"maybe" (boolean) for @mayberule rules</p></li><li class="listitem" style="list-style-type: square"><p>"dist" (boolean) for @distrule rules</p></li><li class="listitem" style="list-style-type: square"><p>"deponly" (boolean) for @deponly rules (but in this case you may want to use @adddeps instead)</p></li><li class="listitem" style="list-style-type: square"><p>"iscleanhook" (boolean) for clean hooks for object files, to be executed with -c argument</p></li><li class="listitem" style="list-style-type: square"><p>"isdistcleanhook" (boolean) for distclean hooks for binary files, to be executed with -b argument</p></li><li class="listitem" style="list-style-type: square"><p>"isbothcleanhook" (boolean) for bothclean hooks for object and binary files, to be executed with -bc argument</p></li></ul></div>
+</li></ul></div><p>
+
+</p><p>
+
+Here's an example of dynamically adding rules, from fastdiv Stirfile:
+
+</p><pre class="programlisting">
+@function $LIST_TO_DICTS_SIMPLE($list, $param)
+  @locvar $i=0
+  @locvar $dicts=[]
+  @for($i=0,$i&lt;$list[],$i=$i+1)
+    @append($dicts, {$param: $list[$i]})
+  @endfor
+  @return $dicts
+@endfunction
+
+@function $MODULE($lib, $src_lib, $src_prog, $libs, $unitdeps, $unitcmds)
+  @locvar $src = [@$src_lib, @$src_prog]
+  @locvar $obj_lib = @sufsuball($src_lib, ".c", ".o")
+  @locvar $obj_prog = @sufsuball($src_prog, ".c", ".o")
+  @locvar $obj = @sufsuball($src, ".c", ".o")
+  @locvar $dep = @sufsuball($src, ".c", ".d")
+  @locvar $prog = @sufsuball($src_prog, ".c", "")
+  @locvar $alldeps = [@$prog, $lib]
+  @locvar $i = 0
+  @addrule({"tgts": [{"name": "all"}], "attrs": {"phony": @true}, \
+            "deps": @L$LIST_TO_DICTS_SIMPLE($alldeps, "name")})
+  @addrule({"tgts": [{"name": "unit"}], "attrs": {"phony": @true}, \
+            "deps": @L$LIST_TO_DICTS_SIMPLE($unitdeps, "name"), \
+            "shells": [{"embed": @true, "cmds": $unitcmds}]})
+  @for($i=0,$i&lt;$obj[],$i=$i+1)
+    @addrule({"tgts": [{"name": $obj[$i]}], \
+              "deps": [{"name": $src[$i]}, {"name": $dep[$i]}], \
+              "shells": [{"cmd": [ \
+                          @D$(CC), @@D$(CFLAGS), "-c", "-o", $obj[$i], \
+                          $src[$i]]}]})
+    @addrule({"tgts": [{"name": $dep[$i]}], \
+              "deps": [{"name": $src[$i]}], \
+              "shells": [{"cmd": [ \
+                          @D$(CC), @@D$(CFLAGS), "-M", "-o", $dep[$i], \
+                          $src[$i]]}]})
+  @endfor
+  @for($i=0,$i&lt;$prog[],$i=$i+1)
+    @addrule({"tgts": [{"name": $prog[$i]}], \
+              "deps": [{"name": $obj_prog[$i]}, \
+                       {"name": $lib}, \
+                       @@L$LIST_TO_DICTS_SIMPLE($libs, "name")], \
+              "shells": [{"cmd": [ \
+                          @D$(CC), @@D$(CFLAGS), "-o", $prog[$i], \
+                          $obj_prog[$i], $lib, @$libs, @@D$(LDFLAGS), \
+                          "-lpthread", "-ldl"]}]})
+  @endfor
+  @addrule({"tgts": [{"name": $lib}], \
+            "deps": @L$LIST_TO_DICTS_SIMPLE($obj_lib, "name"), \
+            "shells": [{"embed": @true, "cmds": [ \
+                        ["rm", "-f", $lib], \
+                        ["ar", "rvs", $lib, @$obj_lib]]}]})
+@endfunction
+
+</pre><p>
+
+Note how the library target (last rule) and how the unit testing target (second
+rule) use "embed" which is @true, and in every other rule it's omitted which
+means @false default.
+
+</p><p>
+
+...and here is a call to $MODULE to actually use it to create a library:
+</p><pre class="programlisting">
+@subfile
+@strict
+
+# You can modify these
+$SRC_LIB = ["fastdivlib.c"]
+$SRC_PROG = []
+$LIB = "libfastdiv.a"
+$EXTRACFLAGS = []
+$CFLAGS = [@$CFLAGS, @$EXTRACFLAGS]
+$LIBS = []
+$UNITDEPS = []
+$UNITCMDS = []
+
+# You won't want to modify anything below this line
+@call $MODULE($LIB, $SRC_LIB, $SRC_PROG, $LIBS, $UNITDEPS, $UNITCMDS)
+
+@cdepincludes @autophony @autotarget @ignore \
+  @sufsuball([@$SRC_PROG, @$SRC_LIB], ".c", ".d")
+</pre><p>
+
+...and here is a call to $MODULE to actually use it to create a binary linked
+to the library:
+
+</p><pre class="programlisting">
+@subfile
+@strict
+
+# You can modify these
+$SRC_LIB = []
+$SRC_PROG = ["main.c"]
+$LIB = "libexamples.a"
+$EXTRACFLAGS = ["-I../lib"]
+$CFLAGS = [@$CFLAGS, @$EXTRACFLAGS]
+$LIBS = ["../lib/libfastdiv.a"]
+$UNITDEPS = []
+$UNITCMDS = [["./main"]]
+
+# You won't want to modify anything below this line
+@call $MODULE($LIB, $SRC_LIB, $SRC_PROG, $LIBS, $UNITDEPS, $UNITCMDS)
+
+@cdepincludes @autophony @autotarget @ignore \
+  @sufsuball([@$SRC_PROG, @$SRC_LIB], ".c", ".d")
+</pre><p>
+
+Note how the $MODULE function removed a lot of boilerplate code.
+
+</p>
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp54"></a>Finding stirmake version and version history</h2></div></div></div>
+      
+<p>
+
+Stirmake knows its entire git version history. You may query for the SHA1 hash
+of the current version, or query all past versions too. The reason for knowing
+the entire git version history is that it's then possible to demand that at
+least a certain stirmake version is present, or to dynamically check with @if
+that a certain version is present and if not, not execute that @if block.
+
+</p><p>
+
+How to query for current git version:
+
+</p><pre class="programlisting">
+stirmake -v
+</pre><p>
+
+Alternatively, stirmake may be substituted to smka, smkt or smkp.
+
+</p><p>
+
+This prints stirmake version and its license and author list. To print the
+entire git version history, you may run:
+
+</p><pre class="programlisting">
+stirmake -G
+</pre><p>
+
+</p>
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp55"></a>Version conditionals and minimum version requirements, future builtins</h2></div></div></div>
+      
+<p>
+
+Let us assume that you have stirmake version
+aa8c054fbf5c7d151f15bb4307fc6df8ca83e787 and that version of stirmake contains
+some fix or feature that is essential to the proper handling of your Stirfile.
+Then users of prior versions of stirmake try to build your project and fail.
+It would be useful to have a feature that clearly stops processing your
+Stirfile immediately with a message that tells at least version
+aa8c054fbf5c7d151f15bb4307fc6df8ca83e787 is required.
+
+</p><p>
+
+This feature is @version and works as follows:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+@version("aa8c054fbf5c7d151f15bb4307fc6df8ca83e787")
+@phonyrule: 'all':
+</pre><p>
+
+Executing it with the proper version or newer, prints:
+
+</p><pre class="programlisting">
+stirmake: Nothing to be done.
+</pre><p>
+
+...but with an old version, it prints:
+
+</p><pre class="programlisting">
+Incompatible version of stirmake installed, expected to contain git SHA1:
+aa8c054fbf5c7d151f15bb4307fc6df8ca83e787
+stirmake: *** Parsing failed. Exiting.
+</pre><p>
+
+Also @version can be used in top-level conditionals, where it does not cause an
+immediate failure, but rather executes the code inside them:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+
+@if(@version("ThisVersionDoesNotExist"))
+@call @dum
+@call @dum()
+@call @dum(5)
+@call @dum(5,6)
+@call @dum(5,6,7)
+@endif
+@if(@version("aa8c054fbf5c7d151f15bb4307fc6df8ca83e787"))
+@call @dump(6)
+@endif
+</pre><p>
+
+This Stirfile prints 6. Note how the @dum is not any supported built-in, but
+yet Stirmake did not fail when parsing that. The reason is that future
+built-ins that begin with @ but are not yet defined are parsed by a special
+rule that causes parsing failure if they are not inside a version conditional,
+but there is no parse error if inside version conditional that is false.
+
+</p>
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp56"></a>Hacking abce</h2></div></div></div>
+      
+<p>
+
+Stirmake uses abce as a sub-project to provide the built-in Amyplan programming
+language. The language has both reference counting and garbage collection. Now
+that garbage collection has been added to it, several precautions need to be
+taken. At every time a function which may result in garbage collection being
+called, is called, every object must be referenced from areas visible to the
+garbage collection. There is a secondary "C" stack in addition to the main
+stack to make this easier.
+
+</p><p>
+
+As an example, you don't create array with function abce_mb_create_array(abce)
+which would return a memblock, since that function would be dangerous. The
+result would contain a reference to something which is not visible to the abce
+engine and its garbage collector.
+
+</p><p>
+
+Instead, you create an array with function abce_mb_cpush_create_array(abce).
+It returns a memblock pointer, but most importantly, it adds the memblock to
+the top of the "C" stack. After you have used the result and no longer require
+a pointer to it, you call abce_cpop(abce) which removes it from the top of the
+"C" stack.
+
+</p><p>
+
+The memblocks can be either pointers to memblock (owned by something else, no
+reference count addition needed when accessing) or memblock itself via struct
+not pointer (owned by whatever data structure the memblock is in, holds a
+reference count). If accessing memblocks via structs not pointers, you need to
+always use abce_mb_refup to up-reference and abce_mb_refdown to down-reference.
+Note however that if the only reference to an object is held in an area not
+visible to garbage collection, the code is fragile and can crash in the garbage
+collector. Therefore, it is recommended to use pointer to a memblock in some
+data structure that is visible to the abce engine and its garbage collector.
+If there is no logical data structure to hold the reference, you should really
+consider adding the reference to the "C" stack.
+
+</p><p>
+
+Also you have to note that some of the Lex/Yacc code are duplicated between
+abce and stirmake, in a manner that is slightly different since the file
+stiryy.l contains two modes, INITIAL and STRICT, whereas amyplanyy.l does not.
+All features that have been added to amyplanyy.l and amyplanyy.y should be
+included to stiryy.l and stiryy.y too to keep them in sync.
+
+</p><p>
+
+If adding new opcodes to abce, it is important to note which type they are: an
+opcode relevant to the programming language itself, or an opcode that is only
+relevant when called from stirmake, controlling features of stirmake that are
+not present in abce. The former should be added to engine.c and abceopcodes.h
+and the latter to stirtrap.c and stiropcodes.h. Note that the custom opcodes
+reserved to stirmake and the standard opcodes reserved to abce have different
+numbers: abce is 0-63, stirmake 64-127, abce 128-1023 and stirmake 1024-2047.
+
+</p>
+    </div>
+  </div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch13.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="pt04.html">Up</a></td><td width="40%" align="right"> </td></tr><tr><td width="40%" align="left" valign="top">Chapter 13. Programming Stirmake with Amyplan </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> </td></tr></table></div></body></html>

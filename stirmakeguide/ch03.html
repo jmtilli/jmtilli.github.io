@@ -1,0 +1,859 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Chapter 3. Introducing stirmake</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="home" href="index.html" title="Scalable true implementation of recursive make (stirmake), user's guide" /><link rel="up" href="pt02.html" title="Part II. Stirmake, a modern tool" /><link rel="prev" href="pt02.html" title="Part II. Stirmake, a modern tool" /><link rel="next" href="ch04.html" title="Chapter 4. Variables, data types and functions" /></head><body><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter 3. Introducing stirmake</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="pt02.html">Prev</a> </td><th width="60%" align="center">Part II. Stirmake, a modern tool</th><td width="20%" align="right"> <a accesskey="n" href="ch04.html">Next</a></td></tr></table><hr /></div><div class="chapter"><div class="titlepage"><div><div><h2 class="title"><a id="stirmakeintro"></a>Chapter 3. Introducing stirmake</h2></div></div></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="ch03.html#stirmakeinstall">Compiling and installing stirmake</a></span></dt><dt><span class="sect1"><a href="ch03.html#helloworld">Compiling hello world</a></span></dt><dt><span class="sect1"><a href="ch03.html#modularhellolib">Modular hello from library</a></span></dt><dt><span class="sect1"><a href="ch03.html#environmentandconf">Environment and configuration commands</a></span></dt><dt><span class="sect1"><a href="ch03.html#multiprocessing">Multiprocessor machines</a></span></dt><dt><span class="sect1"><a href="ch03.html#tracingdebugging">Tracing and debugging</a></span></dt></dl></div>
+    
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="stirmakeinstall"></a>Compiling and installing stirmake</h2></div></div></div>
+      
+
+<p>
+Firstly, before stirmake can be used, flex, byacc and git need to be installed.
+Flex is a very widely used tool, the most common implementation of lex today,
+so its installation shouldn't be a problem, as most Unix-like operating systems
+have an easy way to install it. Similarly, git is probably the most popular
+version control system so installing it shouldn't be a problem. On the other
+hand, byacc may cause problems in some environments. At least RedHat and
+Debian-based systems such as Ubuntu contain byacc in their repositories. In
+stirmake, bison was considered but rejected due to the GPL license, which byacc
+does not suffer from. Fortunately, byacc should be easy to compile from sources
+if the operating system does not have a ready-made package for it.
+
+</p><p>
+
+You also need GNU make to bootstrap stirmake, and the essential build tools
+like C compiler and linker.
+
+</p><p>
+
+On RedHat, you would install the dependencies as follows:
+</p><pre class="programlisting">
+yum install flex byacc git
+yum groupinstall 'Development Tools'
+</pre><p>
+
+</p><p>
+
+On Debian and Ubuntu, it works as follows:
+</p><pre class="programlisting">
+apt install flex byacc git build-essential
+</pre><p>
+
+</p><p>
+
+Now when dependencies have been installed, it's time to recursively clone and
+install stirmake:
+</p><pre class="programlisting">
+git clone --recursive https://github.com/Aalto5G/stirmake
+cd stirmake/stirc
+make
+./install.sh
+</pre><p>
+
+</p><p>
+
+This installs stirmake to your ~/.local/bin that needs to be in the path. If
+the directory did not exist, it probably isn't in the path and you may need to
+re-log-in. Globally installing stirmake to /usr/local would happen as follows,
+assuming it's already cloned:
+</p><pre class="programlisting">
+cd stirmake/stirc
+make
+sudo ./install.sh /usr/local
+sudo mandb
+</pre><p>
+
+</p><p>
+
+After it has been installed, try it:
+</p><pre class="programlisting">
+mkdir stirmaketry
+cd stirmaketry
+stirmake -a
+smka
+smkp
+smkt
+</pre><p>
+
+</p><p>
+
+All of the commands to invoke stirmake should print something like this:
+</p><pre class="programlisting">
+stirmake: Using directory /home/YOURUSERNAME/stirmaketry
+stirmake: *** Stirfile not found. Exiting.
+</pre><p>
+
+</p><p>
+
+They should also leave a .stir.db file containing just two lines out of which
+the second is empty:
+</p><pre class="programlisting">
+@v2@
+
+</pre><p>
+
+</p><p>
+
+Stirmake has been designed to work on POSIX systems but sometimes non-POSIX
+functions are needed. For example, stirmake heavily benefits from availability
+of madvise but does not require it. But what stirmake requires is the
+possibility to map anonymous memory, whether it's MAP_ANON or MAP_ANONYMOUS
+argument to mmap, or mmap from an open file /dev/zero. Also obsolete POSIX
+setitimer is needed since the newer equivalents timer_settime etc. may not be
+available on all systems like OpenBSD. The new POSIX utimensat heavily benefits
+stirmake, but it can work with utimes if utimensat is not present. What is not
+present in POSIX is getloadavg, but all the important operating systems like
+BSDs, Linux, MacOS X and Solaris have it. Stirmake can work without it, but it
+disables the functionality to reduce parallelism at times of increased load.
+Also stirmake needs to know how many processors the machine has, which is a
+non-POSIX call, and if the system does not support getting processor count,
+then as default 1 is used. This only affects the -la and -ja options.
+
+</p>
+
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="helloworld"></a>Compiling hello world</h2></div></div></div>
+      
+
+<p>
+
+Always "hello world" is the program that is written in any programming
+language. Similarly, it must be easy to compile "hello world", a single source
+file, in any build system.
+
+</p><p>
+
+First, let's create the .c source file hello.c:
+</p><pre class="programlisting">
+#include &lt;stdio.h&gt;
+int main(int argc, char **argv)
+{
+  printf("Hello, world!\n");
+  return 0;
+}
+</pre><p>
+
+</p><p>
+
+Then we can create the Stirfile to build it:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all': 'hello'
+'hello': 'hello.c'
+@	["cc", "-o", $@, $&lt;]
+</pre><p>
+
+</p><p>
+
+To actually build everything in this stirfile, type "smka".
+
+</p><p>
+
+Note the @-tabulator at the beginning of the command line. Similar to make,
+tabulator must be present before the command. However, in this case, the @
+specifier is used to bypass shell and use direct execution of the compiler.
+
+</p><p>
+
+If shell is needed, there are two options. First is to invoke sh with -c
+argument:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all': 'hello'
+'hello': 'hello.c'
+@	["sh", "-c", "cc -o " . $@ . " " . $&lt;]
+</pre><p>
+
+</p><p>
+
+The second is to invoke it the same way as with make, omitting the @ character
+before tabulator:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all': 'hello'
+'hello': 'hello.c'
+	cc -o $@ $&lt;
+</pre><p>
+
+</p><p>
+
+Both of these ways to invoke the shell are equal, as evidenced by the identical
+output:
+</p><pre class="programlisting">
+stirmake: Using directory /home/juhis/smdb/shell
+[., hello] sh -c cc -o hello hello.c
+</pre><p>
+
+</p><p>
+
+Note that the rule 'all' is phony, but the rule 'hello' is not. A rule that
+is not phony must create its target. If the target was not created, the rule
+should probably be marked a @phonyrule. Standard GNU make does not warn if
+a rule that is non-phony does not create its target. But stirmake does warn:
+</p><pre class="programlisting">
+@toplevel
+@strict
+'all': 'hello'
+'hello': 'hello.c'
+@	["cc", "-o", $@, $&lt;]
+</pre><p>
+
+</p><p>
+
+This results in:
+</p><pre class="programlisting">
+stirmake: Using directory /home/juhis/smdb/shell
+[., hello] cc -o hello hello.c
+stirmake: *** Target all was not created by rule.
+stirmake: *** Hint: use @phonyrule for phony rules.
+stirmake: *** Hint: use @mayberule for rules that may or may not update target.
+stirmake: *** Hint: use @rectgtrule for rules that have targets inside @recdep.
+stirmake: *** Target all was not created by rule. Exiting.
+</pre><p>
+
+</p><p>
+
+All of the rules here were marked @strict. @strict means that targets and
+sources must be strings, using single or double quotes around them. If @strict
+is not used, you may omit the quotes. However, this is not recommended, since
+after @strict has been removed, the token 4/2 is not a mathematical expression
+equal to 2, but it's a file 2 in directory 4. The reason here being that
+maximum munch tokenization is used, and 4/2 is longer than 4, so the lexer goes
+on to include more stuff for the token. In non-@strict mode, to calculate 4
+divided by 2, you can add spaces or parentheses: 4 / 2 or (4)/(2).
+
+</p><p>
+
+Note that the @-tabulator syntax has a different way to specify variables than
+the tabulator syntax. The @-tabulator syntax parses an arbitrary Amyplan
+expression, which should create an array. This means for example variable
+CC can be referred to by $CC. However, the tabulator-only syntax
+requires $(CC). So you can have:
+</p><pre class="programlisting">
+@toplevel
+@strict
+$CC = "cc"
+@phonyrule: 'all': 'hello'
+'hello': 'hello.c'
+@	[$CC, "-o", $@, $&lt;]
+</pre><p>
+
+</p><p>
+
+But with tabulator, this doesn't work:
+</p><pre class="programlisting">
+@toplevel
+@strict
+$CC = "cc"
+@phonyrule: 'all': 'hello'
+'hello': 'hello.c'
+	$CC -o $@ $&lt;
+</pre><p>
+
+</p><p>
+
+But you must do this instead:
+</p><pre class="programlisting">
+@toplevel
+@strict
+$CC = "cc"
+@phonyrule: 'all': 'hello'
+'hello': 'hello.c'
+	$(CC) -o $@ $&lt;
+</pre><p>
+
+</p><p>
+
+However, the $(CC) syntax works outside a tabulator line too:
+</p><pre class="programlisting">
+@toplevel
+@strict
+$(CC) = "cc"
+@phonyrule: 'all': 'hello'
+'hello': 'hello.c'
+@	[$(CC), "-o", $@, $&lt;]
+</pre><p>
+
+</p>
+
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="modularhellolib"></a>Modular hello from library</h2></div></div></div>
+      
+<p>
+
+The previous section demonstrated how to build a simple project with one
+directory using stirmake. However, complex projects have numerous directories
+and may have several binaries and several static libraries. We shall
+emulate such a project by a modular "hello world" application where the
+program invokes a function from a static library.
+
+</p><p>
+
+Let's create the top-level Stirfile first:
+</p><pre class="programlisting">
+@toplevel
+@strict
+$CC = "cc"
+$RM = "rm"
+$AR = "ar"
+$CFLAGS = ["-Wall", "-O3"]
+@phonyrule: 'all': 'lib/all' 'prog/all'
+@dirinclude "lib"
+@dirinclude "prog"
+</pre><p>
+
+Then let's create a directory lib with hello.c:
+</p><pre class="programlisting">
+#include "hello.h"
+#include &lt;stdio.h&gt;
+void hello(void)
+{
+  printf("Hello world\n");
+}
+</pre><p>
+...and hello.h:
+</p><pre class="programlisting">
+#ifndef _HELLO_H_
+#define _HELLO_H_
+
+void hello(void);
+
+#endif
+</pre><p>
+...and Stirfile:
+</p><pre class="programlisting">
+@subfile
+@strict
+$OBJS=["hello.o"]
+$DEPS=@sufsuball($OBJS, ".o", ".d")
+
+@phonyrule: 'all': 'libhello.a'
+
+'libhello.a': $OBJS
+@	[$RM, "-f", $@]
+@	[$AR, "rvs", $@, @@suffilter($^, ".o")]
+
+@patrule: $OBJS: '%.o': '%.c' '%.d'
+@	[$CC, @$CFLAGS, "-c", "-o", $@, $&lt;]
+@patrule: $DEPS: '%.d': '%.c'
+@	[$CC, @$CFLAGS, "-MM", "-o", $@, $&lt;]
+
+@cdepincludes @autophony @autotarget @ignore $DEPS
+</pre><p>
+...which contains the @-operator which is used to include a whole array into
+another array. For example, [$CC, $CFLAGS] would not be an array of strings
+since $CFLAGS is an array already. But [$CC, @$CFLAGS] is an array of strings
+due to the @-operator. The same operator is used in [$AR, "rvs", $@,
+@@suffilter($^, ".o")] where having only [$AR, "rvs", $@, @suffilter($^, ".o")]
+would not be an array of strings. Also @cdepincludes @autophony @autotarget
+@ignore was used to include C language header dependencies. Usually all of
+@autophony (add phony rule for each header), @autotarget (add target file.d in
+addition to file.o) and @ignore (don't stop if some dependency file doesn't
+exist yet) are used together.
+
+</p><p>
+
+Note also the patrule. For example, the first patrule for $OBJS means that the
+items in $OBJS must match pattern '%.o' where % is the wildcard. There has to
+be exactly one wildcard in the target. The source files may have zero or one
+wildcard(s) each, and the content from the target wildcard is used to fill the
+possible '%' wildcard in the source files. It is important to note here that
+these pattern rules are not similar to automatic rules in make. Every single
+instantiation needs to occur in $OBJS. It is not possible to leave $OBJS away
+and have stirmake deduce that pattern rule can be used for a target ending in
+.o if there's a wildcard rule with target pattern '%.o'.
+
+</p><p>
+Then let's create a directory prog with prog.c:
+</p><pre class="programlisting">
+#include "hello.h"
+int main(int argc, char **argv)
+{
+  hello();
+}
+</pre><p>
+...and Stirfile:
+</p><pre class="programlisting">
+@subfile
+@strict
+$OBJS=["prog.o"]
+$DEPS=@sufsuball($OBJS, ".o", ".d")
+$CFLAGS += ["-I../lib"]
+
+@phonyrule: 'all': 'prog'
+
+@distrule: 'prog': $OBJS '../lib/libhello.a'
+@	[$CC, @$CFLAGS, "-o", $@, @@suffilter($^, ".o"), \
+	@@suffilter($+, ".a")]
+
+@patrule: $OBJS: '%.o': '%.c' '%.d'
+@	[$CC, @$CFLAGS, "-c", "-o", $@, $&lt;]
+@patrule: $DEPS: '%.d': '%.c'
+@	[$CC, @$CFLAGS, "-MM", "-o", $@, $&lt;]
+
+@cdepincludes @autophony @autotarget @ignore $DEPS
+</pre><p>
+...which assigns to $CFLAGS in a manner that is visible only in this subdirectory. The other subdirectory "lib" does not have this modification to $CFLAGS. However, if the "prog" directory contained a subdirectory "prog/proghelpers", with its own Stirfile, then proghelpers would see this modification made to $CFLAGS in prog/Stirfile. This fully working nested recursive scoping is the main feature of Stirmake, making it better than GNU make.
+
+</p><p>
+
+Note the line continuation syntax where immediately before the newline the
+backslash is placed, and the line continues on the following line. It is
+important that the backslash is immediately before the newline and that there
+are no spaces before the newline and after the backslash. Since stirmake uses
+newline for terminating statements, like Python does, there has to be the line
+continuation syntax for convenience. Implicit continuation with parentheses,
+square brackets or curly braces is not supported.
+
+</p><p>
+
+Then several operations can be done. To fully clean the full directory
+structure, use the command:
+</p><pre class="programlisting">
+smka -bc
+</pre><p>
+...which works in any directory, top-level directory or either of the two
+subdirectories. Here "-b" means "clean distributable binaries" (marked with
+@distrule) and "-c" means "clean everything else than distributable binaries".
+If you want to clean only the subdirectory lib, use:
+</p><pre class="programlisting">
+cd lib
+smkt -bc
+</pre><p>
+
+</p><p>
+
+Another operation is building the structure. For example, the following command
+works in any directory, top-level or subdirectory, as long as the directory
+contains a Stirfile:
+</p><pre class="programlisting">
+smka
+</pre><p>
+...but another equivalent option would be:
+</p><pre class="programlisting">
+cd prog
+smkt ../all
+</pre><p>
+...here "smka" means "stirmake all" and "smkt" means "stirmake this directory".
+</p><p>
+
+The power of stirmake is evident by running:
+</p><pre class="programlisting">
+smka -bc
+cd prog
+smkt
+</pre><p>
+...which builds all dependencies of the prog directory too, but nothing else
+above the "prog" directory. With recursive make, this would not work:
+</p><pre class="programlisting">
+make clean
+cd prog
+make
+</pre><p>
+...since prog depends on lib, and the only way to build lib would be to invoke
+"make" in the top-level directory.
+
+</p>
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="environmentandconf"></a>Environment and configuration commands</h2></div></div></div>
+      
+
+<p>
+
+In standard make, if you do $(CC) $(CFLAGS), it uses both of these from
+the environment, if the Makefile does not override them. This can cause
+surprising bugs, where a Makefile works in one environment and not in another
+environment. Stirmake is different, because in Stirmake if you want a
+variable to be obtained from environment, you must obtain it manually. An
+example:
+</p><pre class="programlisting">
+@toplevel
+@strict
+$CC=@strwordlist(@getenv("CC"), " ")
+@if($CC[] == 0)
+$CC=["cc"]
+@endif
+$CFLAGS=@strwordlist(@getenv("CFLAGS"), " ")
+@phonyrule: 'all': 'hello'
+'hello': 'hello.c'
+@	[@$CC, @$CFLAGS, "-o", $@, $&lt;]
+</pre><p>
+
+</p><p>
+
+In this case, if the environment variable does not exist, @getenv returns @nil.
+However, @strwordlist has a special feature which returns an empty array for
+@nil argument. Here $CFLAGS is not mandatory so if it's [], nothing is done.
+However, $CC must be defined, so the array is checked for emptiness and if
+empty, the default value ["cc"] is used. Note how both $CC and $CFLAGS are
+arrays. This is done because some environments may specify CC="cc -O3" for
+example, although usually you would expect O3 to be in CFLAGS and not in CC.
+However, because GNU make does not support true arrays, every variable is a
+potential array with space as the separator.
+
+</p><p>
+
+The previous example showed how environment variables can be used. But in
+some cases, you have to run a configuration command to get the arguments.
+For example, when developing Python 3 applications, you would use the command
+python3-config --includes. How to use it in Stirmake:
+</p><pre class="programlisting">
+@toplevel
+@strict
+$CC=["cc"]
+$CFLAGS=["-Wall", "-O3"]
+$PYCFLAGS``=["python3-config", "--includes"]
+$CFLAGS += $PYCFLAGS
+@phonyrule: 'all': 'hello'
+'hello': 'hello.c'
+@	[@$CC, @$CFLAGS, "-o", $@, $&lt;]
+</pre><p>
+...so here the magic was the shell assignment operator ``. A similar operator
+but with one backtick, `=, would give you the entire unprocessed output of
+the command, with newline at end if the command printed a newline. This newline
+may be removed with $VAR=@chomp($VAR). However, in this case you want an array
+with space as the separator for compatibility with GNU make, so the assignment
+operator needs to have two backticks, which interprets the output as an array
+with space as the separator. Note that @strwordlist could be used here as
+needed:
+</p><pre class="programlisting">
+@toplevel
+@strict
+$CC=["cc"]
+$CFLAGS=["-Wall", "-O3"]
+$PYCFLAGS`=["python3-config", "--includes"]
+$PYCFLAGS=@strwordlist(@chomp($PYCFLAGS), " ")
+$CFLAGS += $PYCFLAGS
+@phonyrule: 'all': 'hello'
+'hello': 'hello.c'
+@	[@$CC, @$CFLAGS, "-o", $@, $&lt;]
+</pre><p>
+..so the operator with two backticks is only a convenience operator for a
+common case.
+</p>
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="multiprocessing"></a>Multiprocessor machines</h2></div></div></div>
+      
+
+<p>
+
+Stirmake fully supports multiprocessor machines, but you need to invoke it
+using the command-line option -j, which is true for make as well. However,
+stirmake goes one step further with the -j option and supports CPU count
+autodetection. So if you have an 8-core machine, you can run:
+</p><pre class="programlisting">
+smka -j4
+</pre><p>
+...to use 4 cores, or run:
+</p><pre class="programlisting">
+smka -j8
+</pre><p>
+...to use all 8 cores, which is synonymous for an 8-core machine with:
+</p><pre class="programlisting">
+smka -ja
+</pre><p>
+
+</p><p>
+
+Stirmake makes it easy to implement parallel Stirfiles, and warns you about
+situations that are arguably errors like a command not modifying its target,
+but you need to remember that parallel Stirfiles need to contain all
+dependencies and all targets. In contrast to standard make where a rule
+cannot have more than one target, stirmake does not have such a restriction.
+So, we can finally support flex in a way that works well for parallel stirmake:
+</p><pre class="programlisting">
+'test.lex.c' 'test.lex.h': 'test.lex.l'
+@	["flex", "--outfile=".$@, "--header-file=".@sufsubone($@,".c",".h"), $&lt;]
+@deponly: 'test.lex.d' 'test.lex.o': 'test.lex.h'
+</pre><p>
+
+</p><p>
+
+For parallel GNU make, the best we can do (ugh!) is:
+</p><pre class="programlisting">
+test.lex.c: test.lex.l
+	flex --outfile=$@ --header-file=/dev/null $&lt;
+test.lex.h: test.lex.l
+	flex --outfile=/dev/null --header-file=$@ $&lt;
+text.lex.d: test.lex.h
+text.lex.o: test.lex.h
+</pre><p>
+...which unnecessarily invokes flex twice.
+
+</p><p>
+
+Another useful feature available on any system that supports getting load
+averages is a parallel stirmake that forks child processes only as long as load
+averages are below a critical value. For example, on an 8-core machine, more
+parallelism than 8 simultaneous processes probably doesn't help, and just in
+case two different persons would on the same server invoke smka -j8, the
+behavior of stirmake in such a situation is improved by smka -j8 -l8 which
+forks new processes only as long as load average is below the threshold 8.
+Naturally, -la is supported so maybe the ultimate parallel stirmake command
+is:
+</p><pre class="programlisting">
+smka -ja -la
+</pre><p>
+
+</p><p>
+
+One problem with parallel stirmake is that if two cc instances are running at
+the same time, they are competing their access to the standard output and
+standard error streams, so the error and warning messages from these two cc
+instances can end up being mixed in the output. If you want to collect warning
+messages together so that they can't end up being mixed, you can use the output
+sync feature:
+</p><pre class="programlisting">
+smka -ja -la -Otarget
+</pre><p>
+
+This collects the output from each target together. Unfortunately, it may
+disable the coloring of cc output, since cc no longer knows it's eventually
+writing to a terminal (it first writes to a pipe, which is outputted by
+stirmake to te terminal). The same non-coloring of output happens with GNU make
+as well, so this problem is not unique to stirmake. However, with GNU make you
+need the -j8 (or similar) option with -Otarget to end up having the coloring
+problem, but with stirmake just -Otarget causes the coloring problem.
+
+</p>
+
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="tracingdebugging"></a>Tracing and debugging</h2></div></div></div>
+      
+
+<p>
+
+Stirmake supports two ways of getting information. The lightweight way is
+tracing, which prints information about why stirmake decided to execute
+commands in a rule. This is a one-liner for every rule that's executed, and
+contains the information why this rule was invoked. Example using the modular
+hello world in <a class="link" href="ch03.html#modularhellolib" title="Modular hello from library">a preceding section</a>:
+
+</p><pre class="programlisting">
+smka -bc
+smka -R
+</pre><p>
+
+...where the second command outputs:
+</p><pre class="programlisting">
+stirmake: Using directory /home/YOURUSERNAME/MODULARHELLO
+update target 'lib/hello.d' due to: being nonexistent
+update target 'prog/prog.d' due to: being nonexistent
+[prog, prog/prog.d] cc -Wall -O3 -I../lib -MM -o prog.d prog.c
+update target 'prog/prog.o' due to: being nonexistent
+[prog, prog/prog.o] cc -Wall -O3 -I../lib -c -o prog.o prog.c
+[lib, lib/hello.d] cc -Wall -O3 -MM -o hello.d hello.c
+update target 'lib/hello.o' due to: being nonexistent
+[lib, lib/hello.o] cc -Wall -O3 -c -o hello.o hello.c
+update target 'lib/libhello.a' due to: being nonexistent
+[lib, lib/libhello.a] rm -f libhello.a
+[lib, lib/libhello.a] ar rvs libhello.a hello.o
+ar: creating libhello.a
+a - hello.o
+update target 'prog/prog' due to: being nonexistent
+[prog, prog/prog] cc -Wall -O3 -I../lib -o prog prog.o ../lib/libhello.a
+</pre><p>
+
+</p><p>
+
+Note that the decision to build some target may not result in an immediate execution of the target, but it's queued and the queue is emptied later. So the
+stirmake instance found that lib/hello.d needs to be built in first line of the
+output, but built it much later, as the third comand to be executed.
+
+</p><p>
+
+Another way to obtain debugging information from stirmake, is the heavyweight
+debug mode. It outputs a huge amount of debugging information:
+</p><pre class="programlisting">
+smka -bc
+smka -d
+</pre><p>
+...where the second command outputs:
+</p><pre class="programlisting">
+stirmake: Using directory /home/YOURUSERNAME/MODULARHELLO
+ADDING RULE
+Rule all (.): add_rule
+ADDING RULE
+Rule lib/all (lib): add_rule
+ADDING RULE
+Rule lib/libhello.a (lib): add_rule
+ADDING RULE
+Rule lib/hello.o (lib): add_rule
+ADDING RULE
+Rule lib/hello.d (lib): add_rule
+ADDING RULE
+Rule prog/all (prog): add_rule
+ADDING RULE
+Rule prog/prog (prog): add_rule
+ADDING RULE
+Rule prog/prog.o (prog): add_rule
+ADDING RULE
+Rule prog/prog.d (prog): add_rule
+reading cdepincludes from lib/hello.d
+reading cdepincludes from prog/prog.d
+considering all
+ considering lib/all
+  considering lib/libhello.a
+   considering lib/hello.o
+   ruleid by target lib/hello.c not found
+    considering lib/hello.d
+    ruleid by target lib/hello.c not found
+     do_exec lib/hello.d
+     ruleid for tgt lib/hello.c not found
+     dep: 1759065139 86411140
+     statting lib/hello.d
+     immediate has_to_exec
+     do_exec: has_to_exec 4
+   rule 4 not executed, executing rule 3
+  rule 3 not executed, executing rule 2
+ rule 2 not executed, executing rule 1
+rule 1 not executed, executing rule 0
+ considering prog/all
+  considering prog/prog
+   considering prog/prog.o
+   ruleid by target prog/prog.c not found
+    considering prog/prog.d
+    ruleid by target prog/prog.c not found
+     do_exec prog/prog.d
+     ruleid for tgt prog/prog.c not found
+     dep: 1759065099 90314873
+     statting prog/prog.d
+     immediate has_to_exec
+     do_exec: has_to_exec 8
+   rule 8 not executed, executing rule 7
+  rule 7 not executed, executing rule 6
+   considering lib/libhello.a
+   already execing lib/libhello.a
+  rule 2 not executed, executing rule 6
+ rule 6 not executed, executing rule 5
+rule 5 not executed, executing rule 0
+forking1 child
+start args:
+  NI E NM cc -Wall -O3 -I../lib -MM -o prog.d prog.c
+end args
+[prog, prog/prog.d] cc -Wall -O3 -I../lib -MM -o prog.d prog.c
+select returned
+ reconsidering prog/prog.o
+  considering prog/prog.d
+  already execed prog/prog.d
+  do_exec prog/prog.o
+  ruleid for tgt prog/prog.c not found
+  dep: 1759065099 90314873
+  ruleid 8/prog/prog.d not phony
+  dep: 1759070742 375562092
+  statting prog/prog.o
+  immediate has_to_exec
+  do_exec: has_to_exec 7
+forking child
+start args:
+  NI E NM cc -Wall -O3 -I../lib -c -o prog.o prog.c
+end args
+[prog, prog/prog.o] cc -Wall -O3 -I../lib -c -o prog.o prog.c
+select returned
+ reconsidering prog/prog
+ deps remain: 1
+   dep_remain: 2 / lib/libhello.a
+  considering lib/libhello.a
+  already execing lib/libhello.a
+ rule 2 not executed, executing rule 6
+forking child
+start args:
+  NI E NM cc -Wall -O3 -MM -o hello.d hello.c
+end args
+[lib, lib/hello.d] cc -Wall -O3 -MM -o hello.d hello.c
+select returned
+ reconsidering lib/hello.o
+  considering lib/hello.d
+  already execed lib/hello.d
+  do_exec lib/hello.o
+  ruleid for tgt lib/hello.c not found
+  dep: 1759065139 86411140
+  ruleid 4/lib/hello.d not phony
+  dep: 1759070742 399562149
+  statting lib/hello.o
+  immediate has_to_exec
+  do_exec: has_to_exec 3
+forking child
+start args:
+  NI E NM cc -Wall -O3 -c -o hello.o hello.c
+end args
+[lib, lib/hello.o] cc -Wall -O3 -c -o hello.o hello.c
+select returned
+ reconsidering lib/libhello.a
+  considering lib/hello.o
+  already execed lib/hello.o
+  do_exec lib/libhello.a
+  ruleid 3/lib/hello.o not phony
+  dep: 1759070742 423562206
+  statting lib/libhello.a
+  immediate has_to_exec
+  do_exec: has_to_exec 2
+forking child
+start args:
+  NI E NM rm -f libhello.a
+  NI E NM ar rvs libhello.a hello.o
+end args
+[lib, lib/libhello.a] rm -f libhello.a
+[lib, lib/libhello.a] ar rvs libhello.a hello.o
+ar: creating libhello.a
+a - hello.o
+select returned
+ reconsidering lib/all
+  considering lib/libhello.a
+  already execed lib/libhello.a
+  do_exec lib/all
+  do_exec: mark_executed lib/all has_to_exec 1
+    reconsidering all
+    deps remain: 1
+      dep_remain: 5 / prog/all
+     considering prog/all
+     already execing prog/all
+    rule 5 not executed, executing rule 0
+ reconsidering prog/prog
+  considering lib/libhello.a
+  already execed lib/libhello.a
+  do_exec prog/prog
+  ruleid 7/prog/prog.o not phony
+  dep: 1759070742 395562139
+  ruleid 2/lib/libhello.a not phony
+  dep: 1759070742 423562206
+  statting prog/prog
+  immediate has_to_exec
+  do_exec: has_to_exec 6
+forking child
+start args:
+  NI E NM cc -Wall -O3 -I../lib -o prog prog.o ../lib/libhello.a
+end args
+[prog, prog/prog] cc -Wall -O3 -I../lib -o prog prog.o ../lib/libhello.a
+select returned
+ reconsidering prog/all
+  considering prog/prog
+  already execed prog/prog
+  do_exec prog/all
+  do_exec: mark_executed prog/all has_to_exec 1
+    reconsidering all
+     considering prog/all
+     already execed prog/all
+     do_exec all
+     do_exec: mark_executed all has_to_exec 1
+
+Memory use statistics:
+  stringtab: 22
+  ruleid_by_tgt_entry: 9
+  tgt: 9
+  stirdep: 13
+  dep_remain: 9
+  ruleid_by_dep_entry: 10
+  one_ruleid_by_dep_entry: 13
+  add_dep: 0
+  add_deps: 0
+  rule: 9
+  ruleid_by_pid: 6
+</pre><p>
+...clearly, debug mode should be avoided unless the lighterweight trace mode
+didn't reveal what happened and the heavyweight debug mode is needed then.
+
+</p>
+
+    </div>
+  </div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="pt02.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="pt02.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ch04.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Part II. Stirmake, a modern tool </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Chapter 4. Variables, data types and functions</td></tr></table></div></body></html>

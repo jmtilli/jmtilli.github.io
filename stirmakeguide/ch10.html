@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Chapter 10. Make revolution, one project at a time</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="home" href="index.html" title="Scalable true implementation of recursive make (stirmake), user's guide" /><link rel="up" href="pt03.html" title="Part III. Stirmake in large-scale systems" /><link rel="prev" href="ch09.html" title="Chapter 9. Stirmake for entire project structures" /><link rel="next" href="ch11.html" title="Chapter 11. Scoping and subdirectories" /></head><body><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter 10. Make revolution, one project at a time</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch09.html">Prev</a> </td><th width="60%" align="center">Part III. Stirmake in large-scale systems</th><td width="20%" align="right"> <a accesskey="n" href="ch11.html">Next</a></td></tr></table><hr /></div><div class="chapter"><div class="titlepage"><div><div><h2 class="title"><a id="oneprojectatatime"></a>Chapter 10. Make revolution, one project at a time</h2></div></div></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="ch10.html#idp22">Not everyone uses stirmake yet</a></span></dt><dt><span class="sect1"><a href="ch10.html#idp23">Interfacing to command-line tools that specify flags etc</a></span></dt><dt><span class="sect1"><a href="ch10.html#idp24">Interfacing to environment</a></span></dt><dt><span class="sect1"><a href="ch10.html#idp25">Why compiler name should be a list with arguments</a></span></dt><dt><span class="sect1"><a href="ch10.html#idp26">Integration to subproject cleaning systems with clean hooks</a></span></dt><dt><span class="sect1"><a href="ch10.html#idp27">Recursive directory dependencies</a></span></dt></dl></div>
+    
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp22"></a>Not everyone uses stirmake yet</h2></div></div></div>
+      
+<p>
+
+For build systems, the most important thing to note is that when a new build
+system intended to displace make appears, not everyone uses the new build
+system at the time the new build system appears. Transition is slow, and since
+projects may include subprojects with potentially different build systems, a
+new build system can be successful in displacing make only when it is as
+compatible with make as possible. Importantly, GNU make should be able to
+invoke subprojects that use stirmake, with full jobserver guest, and the
+top-level project built with stirmake should be possible to execute numerous
+GNU make subprojects with full jobserver host.
+
+</p><p>
+
+Stirmake has both jobserver guest and host. When used as host, it actually uses
+a socket pair, not a pipe, but the socket pair has been tested with GNU make
+and found to work. The reason socket pair is superior is that pipes do not
+support the flag MSG_DONTWAIT, but socket pairs do. The pipe cannot be marked
+nonblocking by stirmake, since GNU make expects it to be blocking, but stirmake
+requires nonblocking read. So what stirmake does is that it uses poll() to
+check if there's something to read, and only if there's something to read, it
+tries recv with MSG_DONTWAIT, and if it was found to not be a socket, it arms
+an interval timer to 10 milliseconds, and executes read. The interval timer
+only causes a penalty of 10 milliseconds in case something else stole the
+character from the pipe that was there previously when used with poll().
+
+</p>
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp23"></a>Interfacing to command-line tools that specify flags etc</h2></div></div></div>
+      
+<p>
+
+Sometimes, there is a configuration utility that tells the arguments that
+should be used for compiling something. An example: python3-config --includes
+and python3-config --libs. These commands give arguments to C compiler (where
+#included files are) and linker (what to link in addition to Python). Stirmake
+supports interfacing to such tools with backtick-equals and
+backtick-backtick-equals operators.
+
+</p><p>
+
+The backtick-backtick-equals operator creates a string list, separated with
+spaces. It is what python3-config --includes and python3-config --libs need to
+use, since they give several arguments in one line. Also, the
+backtick-backtick-equals removes the trailing newline present in just about
+every command you can execute with shell:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+$PYTHON3_INCLUDES ``= ["python3-config", "--includes"]
+$PYTHON3_LIBS ``= ["python3-config", "--libs"]
+@call @dump($PYTHON3_INCLUDES)
+@call @dump($PYTHON3_LIBS)
+</pre><p>
+
+...which prints:
+</p><pre class="programlisting">
+["-I/usr/include/python3.8", "-I/usr/include/python3.8"]
+["-lcrypt", "-lpthread", "-ldl", "-lutil", "-lm", "-lm"]
+</pre><p>
+
+The single backtick variant gives you the raw output of the command:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+$PYTHON3_RAW_INCLUDES `= ["python3-config", "--includes"]
+$PYTHON3_RAW_INCLUDES_CHOMPED = @chomp($PYTHON3_RAW_INCLUDES)
+@call @dump($PYTHON3_RAW_INCLUDES)
+@call @dump($PYTHON3_RAW_INCLUDES_CHOMPED)
+</pre><p>
+
+...which prints:
+</p><pre class="programlisting">
+"-I/usr/include/python3.8 -I/usr/include/python3.8\n"
+"-I/usr/include/python3.8 -I/usr/include/python3.8"
+</pre><p>
+
+Here the @chomp builtin is necessary, since the raw command output includes a
+trailing newline, which is removed by @chomp if present.
+
+</p>
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp24"></a>Interfacing to environment</h2></div></div></div>
+      
+<p>
+
+One possible way to interface to environment is to invoke the shell to
+parse environment variables. However, it is a rather heavyweight thing to do
+for a lightweight operation. Still, it works:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+$CC_RAW `= ["sh", "-c", "echo $CC"]
+$CC_CHOMPED = @chomp($CC_RAW)
+@if($CC_CHOMPED[@] == 0)
+  $CC_CHOMPED = "cc"
+@endif
+@call @dump($CC_CHOMPED)
+</pre><p>
+
+Note that this $CC_CHOMPED can only include the compiler, not any arguments
+to it. If you want to support space-separated arguments in CC, you need to
+use the two backtick variant, and the list length getting is different from
+the string length getting, because string length operator uses @ which list
+length operator does not have:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+$CC_PLUS_ARGS ``= ["sh", "-c", "echo $CC"]
+@if($CC_PLUS_ARGS[] == 0)
+  $CC_PLUS_ARGS = ["cc"]
+@endif
+@call @dump($CC_PLUS_ARGS)
+</pre><p>
+
+</p><p>
+
+However, a better approach is to use @getenv since it does not need invoking
+the shell:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+$CC = @getenv("CC")
+@if(@type($CC) == @type(@nil) || $CC[@] == 0)
+  $CC = "cc"
+@endif
+@call @dump($CC)
+</pre><p>
+
+Now this works if CC can only contain compiler name. If it needs to support
+containing arguments to compiler too, then @strwordlist is needed, which
+conveniently treats @nil as an empty string:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+$CC = @strwordlist(@getenv("CC"), " \t")
+@if($CC[] == 0)
+  $CC = ["cc"]
+@endif
+@call @dump($CC)
+</pre><p>
+Note how @strwordlist takes the separators, which in this case are space and
+tab. Multiple separators mean different separator characters, not a string
+separator that needs to contain the characters in the given order.
+
+</p>
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp25"></a>Why compiler name should be a list with arguments</h2></div></div></div>
+      
+<p>
+
+The previous section showed two ways of parsing CC from environment:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+$CC = @getenv("CC")
+@if(@type($CC) == @type(@nil) || $CC[@] == 0)
+  $CC = "cc"
+@endif
+@call @dump($CC)
+</pre><p>
+...which gets a single string, and:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+$CC = @strwordlist(@getenv("CC"), " \t")
+@if($CC[] == 0)
+  $CC = ["cc"]
+@endif
+@call @dump($CC)
+</pre><p>
+...which gets a list containing compiler and its arguments.
+
+</p><p>
+
+The question is: which should you use? In most cases, even though CC may often
+contain just one binary name, in some cases there may be environments that
+somewhat incorrectly use arguments too in CC, instead of (or in addition to)
+having the arguments in CFLAGS. In such a case, you need to use the
+@strwordlist variant that splits CC into an executable binary name and
+potential arguments to it. It affects the use, as the first variant without
+support of optional arguments is used as:
+</p><pre class="programlisting">
+$(CCCMD)&lt;&gt; = [$(CC), @$(CFLAGS), "-c", "-o", $@, $&lt;]
+</pre><p>
+...whereas the second variant with support of optional arguments is used as:
+</p><pre class="programlisting">
+$(CCCMD)&lt;&gt; = [@$(CC), @$(CFLAGS), "-c", "-o", $@, $&lt;]
+</pre><p>
+...since in the second case, the entire CC list needs to be embedded in the
+command line.
+
+</p><p>
+
+Why the somewhat incorrect inclusion of arguments to CC is prevalent is that
+make treats everything as a space-separated list. So with make, CC that
+contains spaces means command name and optional arguments to it. For full
+compatibility with make, it is recommended that you follow the same approach
+in stirmake.
+
+</p>
+
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp26"></a>Integration to subproject cleaning systems with clean hooks</h2></div></div></div>
+      
+<p>
+
+Stirmake has automatic cleaning, but GNU make does not. If a stirmake project
+has GNU make based subprojects as git submodules, there needs to be ways to
+call the explicitly specified cleaning rules of the subprojects.
+
+</p><p>
+
+This is made possible by clean hooks. There are three of them: @cleanhook,
+@distcleanhook and @bothcleanhook for smka -c, smka -b and smka -bc,
+respectively. If the subproject does not support some of these hooks (an
+example: if there is "make clean" for cleaning object files and "make
+distclean" for cleaning everything, but no way to clean just binaries), the
+hook can be specified with "false" as the command, causing an error.
+
+</p><p>
+
+An example of calling clean hooks with make:
+</p><pre class="programlisting">
+@toplevel
+@strict
+
+@cleanhook:
+@	["make", "-C", "subproj", "clean"]
+
+@distcleanhook:
+@	["false"]
+
+@bothcleanhook:
+@	["make", "-C", "subproj", "distclean"]
+
+@phonyrule: 'all':
+@	["echo", "all"]
+</pre><p>
+
+</p>
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp27"></a>Recursive directory dependencies</h2></div></div></div>
+      
+<p>
+
+Stirmake has the possibility to depend on the latest modification time of the
+directory hierarchy. An example: if you have a submodule "argon2" that builds
+"argon2/libargon.a", you can interface to it as follows:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+
+@rectgtrule: 'argon2/libargon2.a': @recdep 'argon2'
+@       ["make", "-C", "argon2"]
+
+@cleanhook:
+@       ["make", "-C", "argon2", "clean"]
+
+@bothcleanhook:
+@       ["make", "-C", "argon2", "clean"]
+</pre><p>
+
+Here the important keywords are @rectgtrule and @recdep. @recdep means that
+the rule depends on the latest modification time in the recursive directory
+hierarchy. An alternative to @rectgtrule is @detouchrule.
+
+</p><p>
+
+@detouchrule rolls back the timestamp of the sources so that if "make -C argon"
+would build one or more targets, the modification time of them would be newer
+than the modification time of some of the sources, meaning one of the targets
+would be considered "older" than the source. After @detouchrule, the recursive
+sources have timestamps rolled back, so none of them is considered "older" than
+some files in the recursive dependency hierarchy.
+
+</p><p>
+
+@rectgtrule rolls forward the timestamps of the targets to the same value, so
+one of the targets is not older than the other target and the sources. The
+timestamp is never rolled backwards, only forwards if there is any change.
+
+</p><p>
+
+Either @rectgtrule of @detouchrule should be specified if there is @recdep. It
+it up to the user to decide which is the better strategy, changing the
+timestamps of the recursive sources, or hanging the timestamps of the targets.
+Without either, if the sub-make builds two or more targets, it is guaranteed
+that one of the targets is newer than the other, which causes an unnecessary
+rebuild which doesn't happen with @rectgtrule or @detouchrule if the target
+list is fully specified.
+
+</p><p>
+
+If neither @rectgtrule nor @detouchrule is used for a rule that is built using
+a sub-make, at least @mayberule should be specified. @mayberule means the rule
+may or may not update its target. With make, this is always the case, since
+make intelligently deduces based on timestamps whether the target is
+up-to-date. If stirmake as the parent process decudes target is not up-to-date,
+but make as the child process deduces target is up-to-date, stirmake executes a
+command that does not modify the timestamp of the target in this special case.
+In this case, stirmake would fail. Specifying @mayberule (and colon) before the
+target allows it to work:
+</p><pre class="programlisting">
+@toplevel
+@strict
+
+@mayberule: 'argon2/libargon2.a': @recdep 'argon2'
+@       ["make", "-C", "argon2"]
+
+@cleanhook:
+@       ["make", "-C", "argon2", "clean"]
+
+@bothcleanhook:
+@       ["make", "-C", "argon2", "clean"]
+</pre><p>
+
+
+</p>
+    </div>
+  </div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch09.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="pt03.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ch11.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter 9. Stirmake for entire project structures </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Chapter 11. Scoping and subdirectories</td></tr></table></div></body></html>

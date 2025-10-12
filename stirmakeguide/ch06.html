@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Chapter 6. Automated cleaning with stirmake</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="home" href="index.html" title="Scalable true implementation of recursive make (stirmake), user's guide" /><link rel="up" href="pt02.html" title="Part II. Stirmake, a modern tool" /><link rel="prev" href="ch05.html" title="Chapter 5. How Stirmake executes its commands" /><link rel="next" href="ch07.html" title="Chapter 7. Conditional compilation" /></head><body><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter 6. Automated cleaning with stirmake</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch05.html">Prev</a> </td><th width="60%" align="center">Part II. Stirmake, a modern tool</th><td width="20%" align="right"> <a accesskey="n" href="ch07.html">Next</a></td></tr></table><hr /></div><div class="chapter"><div class="titlepage"><div><div><h2 class="title"><a id="cleaning"></a>Chapter 6. Automated cleaning with stirmake</h2></div></div></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="ch06.html#idp10">Automated cleaning</a></span></dt><dt><span class="sect1"><a href="ch06.html#idp11">Hooks</a></span></dt></dl></div>
+    
+
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp10"></a>Automated cleaning</h2></div></div></div>
+      
+
+<p>
+
+Stirmake supports automated cleaning with the options -b and -c. The option
+-b cleans only files that have been marked distributables (@distrule), whereas
+the option -c cleans only files that have not been marked distributables. If
+you want to clean everything, you need to use both and run smka -bc.
+
+</p><p>
+
+It is possible to use "smkt -bc" to clean all files in the current directory,
+not all files in all directories. Similarly, "smkt -b" and "smkt -c" work to
+clean only files of the desired type only in the current directory.
+
+</p>
+
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp11"></a>Hooks</h2></div></div></div>
+      
+<p>
+By default, stirmake decides what files need removing when cleaned. However,
+sometimes you may want to add hooks for doing additional actions when cleaning.
+This is supported by:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+
+@cleanhook:
+@	["echo", "cleanhook"]
+
+@distcleanhook:
+@	["echo", "distcleanhook"]
+
+@bothcleanhook:
+@	["echo", "bothcleanhook"]
+
+@phonyrule: 'all':
+@	["echo", "all"]
+</pre><p>
+
+</p><p>
+
+Now if you type "smka -c" the cleanhook is executed. If you type "smka -b", the
+distcleanhook is executed. If you type "smka -bc", then bothcleanhook is
+executed. If you type "smka" without anything, then the first ordinary rule,
+"all", is executed.
+
+</p><p>
+
+There cannot be multiple hooks:
+</p><pre class="programlisting">
+@toplevel
+@strict
+
+@cleanhook:
+@	["echo", "cleanhook"]
+
+@cleanhook:
+@	["echo", "anothercleanhook"]
+
+@phonyrule: 'all':
+@	["echo", "all"]
+</pre><p>
+...which, when called with "smka" will say the hook already exists. However,
+each subdirectory may have its own hooks.
+
+</p><p>
+
+If interfacing to a sub-make that supports cleaning object files and all files
+but not cleaning only binaries, it's possible to add a hook that fails:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+
+@cleanhook:
+@	["echo", "cleanhook"]
+
+@distcleanhook:
+@	["false"]
+
+@bothcleanhook:
+@	["echo", "bothcleanhook"]
+
+@phonyrule: 'all':
+@	["echo", "all"]
+</pre><p>
+...and now "smka -b" does not work.
+
+</p>
+
+    </div>
+
+    
+  </div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch05.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="pt02.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ch07.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter 5. How Stirmake executes its commands </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Chapter 7. Conditional compilation</td></tr></table></div></body></html>

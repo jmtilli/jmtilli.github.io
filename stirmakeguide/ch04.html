@@ -1,0 +1,1337 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Chapter 4. Variables, data types and functions</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="home" href="index.html" title="Scalable true implementation of recursive make (stirmake), user's guide" /><link rel="up" href="pt02.html" title="Part II. Stirmake, a modern tool" /><link rel="prev" href="ch03.html" title="Chapter 3. Introducing stirmake" /><link rel="next" href="ch05.html" title="Chapter 5. How Stirmake executes its commands" /></head><body><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter 4. Variables, data types and functions</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch03.html">Prev</a> </td><th width="60%" align="center">Part II. Stirmake, a modern tool</th><td width="20%" align="right"> <a accesskey="n" href="ch05.html">Next</a></td></tr></table><hr /></div><div class="chapter"><div class="titlepage"><div><div><h2 class="title"><a id="variabledatatypefunction"></a>Chapter 4. Variables, data types and functions</h2></div></div></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="ch04.html#dump">Dump: hello from stirmake</a></span></dt><dt><span class="sect1"><a href="ch04.html#variables">Defining variables</a></span></dt><dt><span class="sect1"><a href="ch04.html#specvar">Special variables</a></span></dt><dt><span class="sect1"><a href="ch04.html#datatypes">Data types, finally we can have spaces in filenames!</a></span></dt><dt><span class="sect1"><a href="ch04.html#conditionals">Conditionals</a></span></dt><dt><span class="sect1"><a href="ch04.html#loops">Loops</a></span></dt><dt><span class="sect1"><a href="ch04.html#string">String</a></span></dt><dt><span class="sect1"><a href="ch04.html#array">Array</a></span></dt><dt><span class="sect1"><a href="ch04.html#simpletypes">Simple data types: number, boolean, nil</a></span></dt><dt><span class="sect1"><a href="ch04.html#tree">Tree</a></span></dt><dt><span class="sect1"><a href="ch04.html#functiondelayeval">Functions and delayed evaluation</a></span></dt><dt><span class="sect1"><a href="ch04.html#functionglobalscope">Functions, global variables and scoping</a></span></dt></dl></div>
+    
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="dump"></a>Dump: hello from stirmake</h2></div></div></div>
+      
+
+<p>
+
+One of the most common tools you need all the time is @dump. It prints its argument in a format that works for all of the data types.
+
+</p><p>
+
+As an example, run this Stirfile:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+@call @dump("Hello world")
+@call @dump(123)
+@call @dump(456.78)
+@call @dump(@nil)
+@call @dump(["foo", 5])
+@call @dump({"bar": {"baz": [567, 89]}})
+</pre><p>
+
+</p><p>
+
+It should print:
+</p><pre class="programlisting">
+stirmake: Using directory /home/YOURUSERNAME/SUBDIR
+"Hello world"
+123
+456.77999999999997272
+null
+["foo", 5]
+{"bar": {"baz": [567, 89]}}
+stirmake: Nothing to be done.
+</pre><p>
+
+</p><p>
+
+Note that dump is a debugging tool. If you want to print strings without the
+quotation marks, you need some other tool. But a clear benefit of dump is that
+it works for all data types.
+
+</p><p>
+
+Also note the @call specifiers before @dump. Every time an Amyplan statement
+is run, without its output being saved to a variable, at top level (outside of
+Amyplan functions), @call is needed. Amyplan has a distinction between
+expressions and statements, and @dump is a statement. An alternative could be
+calling @dump inside a function, in which case @call is not used:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+@function $AMYPLANFUN()
+  @dump("Hello world")
+  @dump(123)
+  @dump(456.78)
+  @dump(@nil)
+  @dump(["foo", 5])
+  @dump({"bar": {"baz": [567, 89]}})
+@endfunction
+@call $AMYPLANFUN()
+</pre><p>
+
+</p><p>
+
+Note that since @dump is a statement instead of an expression, this does not
+work:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+$DISCARD=@dump("Hello world")
+$DISCARD=@dump(123)
+$DISCARD=@dump(456.78)
+$DISCARD=@dump(@nil)
+$DISCARD=@dump(["foo", 5])
+$DISCARD=@dump({"bar": {"baz": [567, 89]}})
+@call @dump($DISCARD)
+</pre><p>
+
+</p><p>
+
+If you want to print a string without quotes and without escape sequences for
+special characters like newlines, you can use @stdout or @stderr:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+@call @stdout("Foo\nbar\n")
+@call @stderr("Baz\nbarf\n")
+</pre><p>
+
+Note that these tools do not add a newline, so if you print:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+@call @stdout("Foo")
+@call @stdout("bar")
+@call @stdout("baz\n")
+</pre><p>
+...everything goes into a single line.
+
+</p>
+
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="variables"></a>Defining variables</h2></div></div></div>
+      
+
+<p>
+
+Variables can be defined outside of functions with the following syntax:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+$MYVAR ?= @nil
+@call @dump($MYVAR)
+$MYVAR = [2, "fof", {"bar": {"baz": [567, 89]}}]
+$MYVAR += [12345, 54321]
+$MYVAR ?= @nil
+@call @dump($MYVAR)
+</pre><p>
+
+</p><p>
+
+Note the several assignment operators here. ?= is conditional assigment,
+assign only if the variable is nonexistent. = is the normal assigment
+operator. For lists, += allows appending multiple elements to the list.
+
+</p><p>
+
+Generally, it is recommended that you define variables $CC and $CFLAGS if you
+compile C code. Both of them ideally should be arrays, since some Makefiles in
+fact assign some of the arguments to $CC into $CC and not into $CFLAGS. Also
+defining variables for sources and targets as arrays is typical.
+
+</p><p>
+
+Inside functions, accessing and assigning into global variables requires
+scope information, lexical or dynamic. An example of lexical scoping:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+$MYVAR ?= @nil
+@function $MYFUN()
+  @L$MYVAR = 5
+@endfunction
+@function $MYFUN2()
+  @locvar $MYVAR=321
+  @dump(@L$MYVAR)
+  @dump($MYVAR)
+@endfunction
+@call $MYFUN()
+@call $MYFUN2()
+</pre><p>
+
+</p><p>
+
+Lexical scoping @L means that the function acceses the scope in which it was
+defined. Dynamic scoping with @D would mean the function accesses the scope in
+which it was called. Local variables are accessed without scope specifiers.  If
+a variale access happens inside a function, it is a local variable as default.
+Even function calls need scope specifiers:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+$MYVAR ?= @nil
+@function $MYFUN()
+  @L$MYVAR = 5
+@endfunction
+@function $MYFUN2()
+  @locvar $MYVAR=321
+  @L$MYFUN()
+  @dump(@L$MYVAR)
+  @dump($MYVAR)
+@endfunction
+@call $MYFUN2()
+</pre><p>
+
+</p><p>
+
+Note that local variables need to be defined at the start of the function.
+If you need a local variable set in the middle of the function, you need to
+define it at the start, but you can assign @nil into it if you don't have
+anything better to assign.
+
+</p>
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="specvar"></a>Special variables</h2></div></div></div>
+      
+
+<p>
+
+There are five special variables: $@, $&lt;, $^, $+ and $|.
+
+</p><p>
+
+Out of these, $@, $&lt; and $^ are the most often used. $@ is the name of the
+first target. $&lt; is the name of the first source. $^ is the names of all
+sources, with duplicates removed. $+ is the same as $^, but duplicate source
+files are repeated in the exact same order, which may be useful sometimes for
+linking static libraries that may have circular dependencies. $| is the names
+of all order-only dependencies.
+
+</p><p>
+
+Out of these, $@ and$&lt; are strings and the others are arrays of strings.
+
+</p>
+
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="datatypes"></a>Data types, finally we can have spaces in filenames!</h2></div></div></div>
+      
+
+<p>
+
+As mentioned already, stirmake supports strings and arrays. This is a
+difference with make since make supports only strings, and arrays are emulated
+by space-delimited strings, which means a filename cannot contain spaces.
+
+</p><p>
+
+Stirmake, via its programming language Amyplan and bytecode engine abce
+supports the following data types:
+
+</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc"><p>@nil</p></li><li class="listitem" style="list-style-type: disc"><p>Boolean: @false or @true</p></li><li class="listitem" style="list-style-type: disc"><p>Number: IEEE double precision floating point, can contain both integers and floating-point numbers, all 32-bit integers can be exactly specified</p></li><li class="listitem" style="list-style-type: disc"><p>String: an immutable sequence of 8-bit characters, with Unicode as UTF-8 if used</p></li><li class="listitem" style="list-style-type: disc"><p>Packet buffer: a mutable sequence of bytes, can be converted from/to strings, contents can be modified, length can be modified</p></li><li class="listitem" style="list-style-type: disc"><p>Array: a mutable sequence of any objects of any types</p></li><li class="listitem" style="list-style-type: disc"><p>Tree: a mapping from immutable strings to any objects of any type. Note that numbers cannot be used as keys, but numbers can be converted to strings which can be used as keys.</p></li><li class="listitem" style="list-style-type: disc"><p>I/O streams: a reference to a file which can be use to read and write data</p></li><li class="listitem" style="list-style-type: disc"><p>Functions, which contain reference to the lexical scope, and which may be called with the correct number of arguments</p></li><li class="listitem" style="list-style-type: disc"><p>Several internal data types not exposed to the programmer</p></li></ul></div><p>
+
+</p><p>
+
+The @type expression can be used to obtain the type of a variable, but as it is
+a number that doesn't document itself, you should use @type of an example object
+against which the type of the object is compared:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+$MYVAR = @nil
+@call @dump(@type($MYVAR) == @type(@nil))
+@call @dump(@type($MYVAR) == @type(@false))
+$MYVAR = 543.21
+@call @dump(@type($MYVAR) == @type(123))
+@call @dump(@type($MYVAR) == @type("foo"))
+$MYVAR = @tostring($MYVAR)
+@call @dump(@type($MYVAR) == @type("foo"))
+$MYVAR = @tonumber($MYVAR)
+@call @dump(@type($MYVAR) == @type(123))
+$MYVAR = @tostring($MYVAR)
+@call @dump(@type($MYVAR) == @type("foo"))
+@call @dump(@type($MYVAR) == @type(@pbnew()))
+$MYVAR = @str2pb($MYVAR)
+@call @dump(@type($MYVAR) == @type("foo"))
+@call @dump(@type($MYVAR) == @type(@pbnew()))
+$MYVAR = @pb2str($MYVAR,0,$MYVAR{@})
+@call @dump(@type($MYVAR) == @type("foo"))
+@call @dump(@type($MYVAR) == @type(@pbnew()))
+$MYVAR = [1,2,3]
+@call @dump(@type($MYVAR) == @type([]))
+@call @dump(@type($MYVAR) == @type({}))
+</pre><p>
+
+</p><p>
+
+Note the @tostring and @tonumber operations which can be used to convert
+between strings and numbers, and the @str2pb and @pb2str operations which can
+be used to convert between strings and packet buffers. The @pb2str operation
+requires starting index (0-based starts from 0) and length of slice to take
+from the packet buffer. The @str2pb always takes the entire string, but <a class="link" href="ch04.html#string" title="String">strings can be sliced with @strsub</a> if needed, and then
+converted to a packet buffer with @str2pb of the sliced string.
+
+</p>
+
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="conditionals"></a>Conditionals</h2></div></div></div>
+      
+
+<p>
+Stirmake supports conditionals both at top level and inside functions. Example:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+
+$A=@true
+$B=@false
+
+@if($A)
+  @call @dump("A is true")
+@else
+  @call @dump("A is false")
+@endif
+
+@if($A)
+@deponly: 'all': 'specialrule'
+@phonyrule: 'specialrule':
+@	["echo", "A is true"]
+@endif
+
+@function $CHECKB($b)
+  @if($b)
+    @dump("B is true")
+  @elseif(!$b)
+    @dump("B is false")
+  @endif
+@endfunction
+
+@call $CHECKB($B)
+</pre><p>
+
+</p><p>
+
+Top-level conditionals can be used to affect which rules and dependencies are
+existing in the data structures of stirmake. So, in the previous example, if
+you modify $A to be false, the phony specialrule is not executed.
+
+</p><p>
+
+A particularly useful conditional is top-level version conditional. If you have
+stirmake version 7e548edc5aa47312a1c517503947aa02e5e20329 (can be checked with
+stirmake -v, the whole version history can be checked with stirmake -G), then
+you can define:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+
+@if(@version("7e548edc5aa47312a1c517503947aa02e5e20329"))
+@deponly: 'all': 'specialrule'
+@phonyrule: 'specialrule':
+@	["echo", "stirmake version is recent"]
+@endif
+
+</pre><p>
+...which invokes the specialrule only if stirmake version is at least
+7e548edc5aa47312a1c517503947aa02e5e20329. Note that git version numbering is
+used here, so the version number is a SHA-1 hash.
+
+</p>
+
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="loops"></a>Loops</h2></div></div></div>
+      
+
+<p>
+
+Stirmake supports two kinds of loops: standard loops and tree loops. We begin
+by explaining standard loops. Tree loops will be explained when
+<a class="link" href="ch04.html#tree" title="Tree">trees are introduced</a>.
+
+</p><p>
+
+The basic loop is @while. It executes its body as long as the condition
+is true. An example:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+@function $ANGLE($angle)
+  @while($angle&lt;0)
+    $angle = $angle + 360
+  @endwhile
+  @return $angle
+@endfunction
+@call @dump($ANGLE(-405))
+</pre><p>
+...this function returns 315 for the argument -405.
+
+</p><p>
+
+Another loop, @once, for error handling may be useful:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+@function $ERRSTATUS1()
+  @dump("ERRSTATUS1 called")
+  @return @true
+@endfunction
+@function $ERRSTATUS2()
+  @dump("ERRSTATUS2 called")
+  @return @false
+@endfunction
+@function $ERRSTATUS3()
+  @dump("ERRSTATUS3 called")
+  @return @true
+@endfunction
+@function $COMBINED()
+  @locvar $ok = @true
+  @once
+    $ok = @L$ERRSTATUS1()
+    @if(!$ok)
+      @break
+    @endif
+    $ok = @L$ERRSTATUS2()
+    @if(!$ok)
+      @break
+    @endif
+    $ok = @L$ERRSTATUS3()
+    @if(!$ok)
+      @break
+    @endif
+  @endonce
+  @return $ok
+@endfunction
+@call @dump($COMBINED())
+</pre><p>
+...note how here the elegant @break inside @once allows emulating goto used in
+C language for error handling, without the ugliness of an arbitrary goto. If
+only @break is used, @once is not a loop. However, it is possible to modify it
+to be an actual infinite loop with @continue:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+@function $ERRSTATUS1()
+  @dump("ERRSTATUS1 called")
+  @return @true
+@endfunction
+@function $ERRSTATUS2()
+  @dump("ERRSTATUS2 called")
+  @return @false
+@endfunction
+@function $ERRSTATUS3()
+  @dump("ERRSTATUS3 called")
+  @return @true
+@endfunction
+@function $COMBINED()
+  @locvar $ok = @true
+  @once
+    $ok = @L$ERRSTATUS1()
+    @if(!$ok)
+      @break
+    @endif
+    $ok = @L$ERRSTATUS2()
+    @if(!$ok)
+      @continue
+    @endif
+    $ok = @L$ERRSTATUS3()
+    @if(!$ok)
+      @break
+    @endif
+  @endonce
+  @return $ok
+@endfunction
+@call @dump($COMBINED())
+</pre><p>
+...now the program alternately prints:
+</p><pre class="programlisting">
+"ERRSTATUS1 called"
+"ERRSTATUS2 called"
+"ERRSTATUS1 called"
+"ERRSTATUS2 called"
+...
+</pre><p>
+
+</p><p>
+
+Where @continue inside @once is useful, is operations that need retrying. For
+example, if a system can encounter deadlocks, the proper way to handle them is
+random exponential back-off, and @once with @continue is the natural construct
+to implement the random exponential back-off.
+
+</p><p>
+
+Of course, the standard @for is supported as well:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+@function $DUMPALL($array)
+  @locvar $i = @nil
+  @for($i = 0, $i &lt; $array[], $i=$i+1)
+    @dump($array[$i])
+  @endfor
+@endfunction
+@call $DUMPALL([1, "2", 3.5, @false, @nil])
+</pre><p>
+
+</p><p>
+
+And if you want to break outside of a loop not the innermost, @break (and
+@continue) take an integer argument:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+@function $DUMPALL($array)
+  @locvar $i = @nil
+  @locvar $j = @nil
+  @for($i = 0, $i &lt; $array[], $i=$i+1)
+    @for($j = 0, $j &lt; 10, $j=$j+1)
+      @dump($j)
+      @dump($array[$i])
+      @if($i == 2 &amp;&amp; $j == 2)
+        @break 2
+      @endif
+    @endfor
+  @endfor
+@endfunction
+@call $DUMPALL([1, "2", 3.5, @false, @nil])
+</pre><p>
+...here the argument 2 means "break out of 2 loops".
+
+</p>
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="string"></a>String</h2></div></div></div>
+      
+
+<p>
+
+Stirmake uses the immutable string data type to represent character strings.
+There is no character data type, so if a data type is needed for character,
+a 1-character long string can be used, or an integer can be used to represent
+character index.
+
+</p><p>
+
+The most common operation with strings is appending:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+$MID = 'ab'
+$JOINT = '0123456789' . $MID . 'cdef'
+@call @dump($JOINT)
+</pre><p>
+...which prints 0123456789abcdef
+
+</p><p>
+
+String characters can be accessed (but not modified as strings are immutable)
+by specifying the @ operator and index inside square brackets. Note the
+@ operator is present to specify it's string indexing; without it, the indexing
+would be array indexing. It works as follows:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+$STR = '123456789'
+@call @dump($STR[@3])
+</pre><p>
+...which prints 52, which is the character index of '4'. To convert it into
+'4':
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+$STR = '123456789'
+@call @dump(@strfromchr($STR[@3]))
+</pre><p>
+
+</p><p>
+
+If a string may or may not have newline at its end, it can be removed with
+@chomp:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+$YESNL = "foo\n"
+$NONL = "bar"
+@call @dump(@chomp($YESNL))
+@call @dump(@chomp($NONL))
+</pre><p>
+
+...which prints foo and bar, without the newline in foo.
+
+</p><p>
+
+String length can be queried:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+$STR = '123456789'
+@call @dump($STR[@])
+</pre><p>
+
+...which prints 9.
+
+</p><p>
+
+Strings cannot be compared by operators &lt;, &lt;=, &gt;, &gt;=; ==, != since
+those are reserved for mathematical expressions. String comparison is made
+by using @strcmp which returns negative, 0 or positive:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+$STR1 = "a"
+$STR2 = "z"
+@call @dump(@strcmp($STR1, $STR2))
+@call @dump(@strcmp($STR2, $STR1))
+</pre><p>
+...in this case, the first @strcmp returns -25 since "a" is smaller than "z".
+The second returns 25.
+
+</p><p>
+
+Strings can be converted to lowercase, uppercase and reversed:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+$MIXEDCASE = "ABCdef"
+@call @dump(@strupper($MIXEDCASE))
+@call @dump(@strlower($MIXEDCASE))
+@call @dump(@strreverse($MIXEDCASE))
+</pre><p>
+
+</p><p>
+
+Strings can be converted to numbers and back to strings:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+$NUMSTR = "123.5"
+@call @dump($NUMSTR)
+@call @dump(@tonumber($NUMSTR))
+@call @dump(@tostring(@tonumber($NUMSTR)+100))
+</pre><p>
+
+</p><p>
+
+Finding index of a substring inside a string is supported:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+$WHOLE="abc123ABC"
+@call @dump(@strstr($WHOLE, "123"))
+@call @dump(@strstr($WHOLE, "456"))
+</pre><p>
+...which prints 3 and null.
+
+</p><p>
+
+String repetition in supported:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+$SHORT="012"
+@call @dump(@strrep($SHORT, 3))
+</pre><p>
+...which prints 012012012
+
+</p><p>
+
+Whitespace at start and end can be stripped:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+$WS="\t   012 "
+@call @dump(@strstrip($WS, " \t"))
+</pre><p>
+
+</p><p>
+
+Substrings can be obtained:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+$NUMS="0123456789"
+@call @dump(@strsub($NUMS, 3, 5))
+</pre><p>
+...where start index 3 is included but end index 5 is not.
+
+</p><p>
+
+Global search&amp;replace (substitution) is supported:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+$STR="Testing string substitution with this string"
+@call @dump(@strgsub($STR, "string", "String"))
+</pre><p>
+
+</p><p>
+
+String words can be counted:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+$STR="Testing string word count with this string"
+@call @dump(@strwordcnt($STR, " "))
+</pre><p>
+
+</p><p>
+
+Individual words can be selected:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+$STR="Testing string word count with this string"
+@call @dump(@strword($STR, " ", 2))
+</pre><p>
+
+</p><p>
+
+Individual characters can be replaced with their numerical values, creating
+a new string as strings are immutable:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+$STR="abc012"
+@call @dump(@strset($STR, 2, ("C")[@0]))
+</pre><p>
+
+</p><p>
+
+The two remaining standard string operations are conversions between
+strings and arrays. For example, strings can be split into word lists, with
+custom separator:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+$STR="Testing string word list."
+@call @dump(@strwordlist($STR, " "))
+</pre><p>
+
+and lists of strings can be joined with custom separator:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+$AR=["Testing", "string", "word", "list."]
+@call @dump(@strlistjoin(" ", $AR))
+</pre><p>
+
+</p>
+
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="array"></a>Array</h2></div></div></div>
+      
+<p>
+
+Arguably the most important data type in Stirmake is array. It allows doing
+something Make cannot do, to have list of file names that may or may not
+include spaces in them. Arrays are defined by square brackets and accessed
+by square brackets too:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+$ARRAY=[1,2,3,4,5]
+@call @dump($ARRAY[2])
+</pre><p>
+
+Indexing is zero-based so the previous listing prints 3. Array length can
+be queried by leaving the index between square brackets away:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+$ARRAY=[5,4,3,2,1]
+@call @dump($ARRAY[])
+</pre><p>
+...which prints 5, the length of the array.
+
+</p><p>
+
+Arrays can be appended to:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+@function $APPEND()
+  @locvar $ARRAY=[5,4,3,2,1]
+  @append($ARRAY, 2)
+  @appendlist($ARRAY, [3,4,5])
+  @dump($ARRAY)
+@endfunction
+@call $APPEND()
+</pre><p>
+...which prints [5,4,3,2,1,2,3,4,5].
+
+</p><p>
+
+Array slicing is supported too:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+@function $SPLICE()
+  @locvar $ARRAY=[0,1,2,3,4,5,6,7]
+  @dump(@splice($ARRAY, 2, 5))
+@endfunction
+@call $SPLICE()
+</pre><p>
+...which prints [2, 3, 4] so it includes the start index (2) but not the end
+index (5).
+
+</p><p>
+
+Removing the last element of an array is supported:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+@function $POP()
+  @locvar $ARRAY=[5,4,3,2,1]
+  @locvar $LAST=$ARRAY[-]
+  @dump($LAST)
+  @dump($ARRAY)
+@endfunction
+@call $POP()
+</pre><p>
+...which prints 1 and then [5,4,3,2].
+
+</p><p>
+
+Array items can be assigned to:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+@function $ASSIGN()
+  @locvar $ARRAY=[5,4,3,2,1]
+  $ARRAY[2] = 50
+  @dump($ARRAY)
+@endfunction
+@call $ASSIGN()
+</pre><p>
+...which prints [5, 4, 50, 2, 1].
+
+</p><p>
+
+Embedding an existing array into a new array is possible with the @-operator:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+@function $EMBED()
+  @locvar $SHORT=[1,2,3]
+  @locvar $LONG=[9,8,7,@$SHORT,7,8,9]
+  @dump($LONG)
+@endfunction
+@call $EMBED()
+</pre><p>
+...which prints [9,8,7,1,2,3,7,8,9].
+
+</p><p>
+
+There is also support outside of functions to append-assign into an array:
+</p><pre class="programlisting">
+@toplevel
+@strict
+$ARRAY=[1,2,3]
+$ARRAY += [4,5,6]
+@phonyrule: 'all':
+@call @dump($ARRAY)
+</pre><p>
+...which prints [1,2,3,4,5,6] and which has an equivalent that works inside
+functions too:
+</p><pre class="programlisting">
+@toplevel
+@strict
+$ARRAY=[1,2,3]
+$ARRAY=[@$ARRAY,4,5,6]
+@phonyrule: 'all':
+@call @dump($ARRAY)
+</pre><p>
+
+</p>
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="simpletypes"></a>Simple data types: number, boolean, nil</h2></div></div></div>
+      
+<p>
+
+The simplest data type that Stirmake supports is nil, which can contain just
+one variable: @nil. To compare if something is @nil, you need to get the @type
+of the object, since two equal signs are meant for numeric comparison and @nil
+is not a number. However, its type is a number. Checking for @nil-ness is as
+follows:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+@function $CHECKNIL()
+  @locvar $isnil = @nil
+  @locvar $notnil = "nil"
+  @if(@type($isnil) == @type(@nil))
+  @dump("Is nil 1")
+  @endif
+  @if(@type($notnil) == @type(@nil))
+  @dump("Is nil 2")
+  @endif
+@endfunction
+@call $CHECKNIL()
+</pre><p>
+
+</p><p>
+
+Booleans can have two values: @false and @true. Every comparison operator
+returns a boolean. Booleans are used in @if statements as follows:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+@function $BOOLFN()
+  @locvar $isnil = @nil
+  @locvar $bool = (@type($isnil) == @type(@nil))
+  @if($bool)
+  @dump("Boolean is true")
+  @endif
+@endfunction
+@call $BOOLFN()
+</pre><p>
+
+</p><p>
+
+Also, the loops @while and @for use booleans to decide whether to continue.
+With booleans, you can use the &amp;&amp;, || and ! operators for logical and,
+logical or and not, respectively:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+@function $BOOLOP()
+  @locvar $isnil = @nil
+  @locvar $bool = !(@true &amp;&amp; (@false || @true))
+  @if($bool)
+  @dump("Boolean is true")
+  @else
+  @dump("Boolean is false")
+  @endif
+@endfunction
+@call $BOOLOP()
+</pre><p>
+
+</p><p>
+
+The logical and an not operators do not unnecessarily evaluate the second
+argument if the first argument can give the value of the operation
+unambiguously.
+
+</p><p>
+
+Numbers are IEEE double precision floating point numbers, and integers are
+special cases of numbers where the floating point part is zero. Divisions
+are true floating point divisions, but @trunc, @floor, @ceil and @round
+are supported for integer division. Addition, subtraction and multiplication
+naturally work.
+
+</p><p>
+Example of where numbers are used:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+@function $NUMFN()
+  @locvar $num = (1*2-3)/4+5
+  @locvar $num2 = @floor((1*2-3)/4)+5
+  @locvar $math = @sqrt(@sin(@log(@exp(3))))
+  @dump($num)
+  @dump($num2)
+  @dump($math)
+  @if($num2 &gt; 4)
+    @dump("Not reached")
+  @elseif($num &gt; 4)
+    @dump("Reached")
+    @if($num2 == 4)
+      @dump("Reached too")
+    @endif
+  @endif
+@endfunction
+@call $NUMFN()
+</pre><p>
+
+</p><p>
+
+The @floor could be @trunc, @round or @ceil too for slightly different
+semantics. Ceil gives value above the argument value, round implements standard
+rounding, and @trunc is similar to @ceil and @floor but always goes toward
+zero, so different for negative and positive. Absolute value can be obtained by
+@abs, discarding a possible negative sign. The full @acos, @asin, @atan, @cos,
+@sin, @tan trigonometry is supported but hyperbolic functions are not
+supported. Exponentiation needs to be implemented with @exp and @log if using
+some other base than e.
+
+</p>
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="tree"></a>Tree</h2></div></div></div>
+      
+
+<p>
+
+Stirmake supports an associative array, which is sometimes varyingly called
+"tree" or "dictionary". It is a red-black tree. The keys used in this red-black
+tree are immutable strings. Nothing else, like numbers, are supported as keys,
+but obviously any number can be converted to its textual representation with
+ease.
+
+</p><p>
+
+Here is an example of defining a tree:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+@function $TREE()
+  @locvar $tree = { \
+    "ab": 123, \
+    "cd": [4,5,6], \
+    "ef": @true, \
+    "gh": @nil, \
+    "ij": "str" \
+  }
+  @dump($tree)
+@endfunction
+@call $TREE()
+</pre><p>
+
+</p><p>
+
+Once you have defined a tree, you can get from it, add to it and delete from it:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+@function $TREEMOD()
+  @locvar $tree = { \
+    "ab": 123, \
+    "cd": [4,5,6], \
+    "ef": @true, \
+    "gh": @nil, \
+    "ij": "str" \
+  }
+  @dump($tree{"ab"}) # Get existing value
+  $tree{"ab"} = 321 # Modify existing value
+  $tree{"a"} = 432 # Add new value
+  $tree{"ij"} = - # Remove value
+  @dump($tree)
+@endfunction
+@call $TREEMOD()
+</pre><p>
+
+</p><p>
+
+It is also possible to query membership and get length:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+@function $TREEQUERIES()
+  @locvar $tree = { \
+    "ab": 123, \
+    "cd": [4,5,6], \
+    "ef": @true, \
+    "gh": @nil, \
+    "ij": "str" \
+  }
+  @dump($tree{@?"a"}) # Check existence, false
+  @dump($tree{@?"ab"}) # Check existence, true
+  @dump($tree{}) # Get length, 5
+@endfunction
+@call $TREEQUERIES()
+</pre><p>
+
+</p><p>
+
+There are fordict and fordictprev loops to iterate through a tree:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+@function $TREELOOPS()
+  @locvar $key = @nil
+  @locvar $val = @nil
+  @locvar $tree = { \
+    "ab": 123, \
+    "cd": [4,5,6], \
+    "ef": @true, \
+    "gh": @nil, \
+    "ij": "str" \
+  }
+  @fordict $key, $val ($tree)
+    @dump($key . " = " . @jsonenc($val))
+  @endfor
+  @dump("-----")
+  @fordictprev $key, $val ($tree)
+    @dump($key . " = " . @jsonenc($val))
+  @endfor
+@endfunction
+@call $TREELOOPS()
+</pre><p>
+
+</p><p>
+
+It is possible to get previous and next key from trees, and @nil as argument
+means get first or last key.
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+@function $TREEPREVNEXT()
+  @locvar $tree = { \
+    "ab": 123, \
+    "cd": [4,5,6], \
+    "ef": @true, \
+    "gh": @nil, \
+    "ij": "str" \
+  }
+  @dump(@dictnext($tree, "ef"))
+  @dump(@dictprev($tree, "ef"))
+  @dump(@dictnext($tree, "eg"))
+  @dump(@dictprev($tree, "eg"))
+  @dump(@dictnext($tree, "e"))
+  @dump(@dictprev($tree, "e"))
+  @dump(@dictnext($tree, @nil))
+  @dump(@dictprev($tree, @nil))
+@endfunction
+@call $TREEPREVNEXT()
+</pre><p>
+
+</p>
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="functiondelayeval"></a>Functions and delayed evaluation</h2></div></div></div>
+      
+<p>
+
+Consider the following Stirfile:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+'hello.o': 'hello.c'
+@	["cc", "-Wall", "-O3", "-c", "-o", $@, $&lt;]
+</pre><p>
+
+...which arguably is not very clean since if new source files are added,
+every file needs to repeat the command used to build it. It is possible
+to slightly eliminate some boilerplate arguments by defining $CC and $CFLAGS:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+$CC="cc"
+$CFLAGS=["-Wall", "-O3"]
+'hello.o': 'hello.c'
+@	[$(CC), @$(CFLAGS), "-c", "-o", $@, $&lt;]
+</pre><p>
+
+...but there is the problem that $@ and $&lt; need to be repeated every time.
+They cannot be evaluated during the top-level $CFLAGS assignment since at the
+time the $CFLAGS assignment is evaluated, $@ and $&lt; are not yet known. So
+delayed evaluation is what's missing, and the simple assignment syntax of
+Stirmake does not offer that.
+
+</p><p>
+
+Of course, since make supports delayed evaluation, stirmake has to have
+something similar with a very handy syntax, or else stirmake cannot be
+considered the ultimate successor to make. In stirmake, delayed evaluation
+is done by using single-line functions and calling them. How to have
+delayed evaluation is best explained by an example:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+$CC="cc"
+$CFLAGS=["-Wall", "-O3"]
+$CCCMD&lt;&gt;=[$(CC), @$(CFLAGS), "-c", "-o", $@, $&lt;]
+'hello.o': 'hello.c'
+@	$CCCMD&lt;&gt;
+</pre><p>
+
+Note the &lt;&gt; operator which has dual purpose. In top-level assignments, it
+means "create a function out of this expression which takes no arguments". When
+used in shell commands or any other similar location, &lt;&gt; means "if the
+preceding value is a function, call it with no arguments, otherwise use the
+value as-is".
+
+</p><p>
+
+This way, a lot of boilerplate commands can be avoided. However, there is still
+another problem. If a static library is created out of this hello.o that was
+just compiled, the static library creation requires not one but two commands.
+The first is "rm -f libstatic.a" and the second is "ar rvs libstatic.a
+hello.o". If the first command is omitted, after several repeated runs,
+libstatic.a may end up having some old deleted object files that are no longer
+used. So there is a need for syntax that has several commands in a single
+function. That is supported by modifying the @-tab at the beginning of the
+command line into @@-tab, and defining $ARCMDS accordingly:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+$CC="cc"
+$CFLAGS=["-Wall", "-O3"]
+$CCCMD&lt;&gt;=[$(CC), @$(CFLAGS), "-c", "-o", $@, $&lt;]
+$ARCMDS&lt;&gt;=[["rm", "-f", $@], ["ar", "rvs", $@, @@suffilter($^, ".o")]]
+'libstatic.a': 'hello.o'
+@@	$ARCMDS&lt;&gt;
+'hello.o': 'hello.c'
+@	$CCCMD&lt;&gt;
+</pre><p>
+
+The @@-tab means that the expression creates not a single command (array of
+strings) but a list of commands (array of arrays of strings).
+
+</p>
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="functionglobalscope"></a>Functions, global variables and scoping</h2></div></div></div>
+      
+<p>
+
+The previous single-line function definitions with &lt;&gt; operator did not
+need to specify the type of scoping used, lexical or dynamic. The single-line
+functions defined with &lt;&gt; use dynamic scoping as default and may not
+have local variables.
+
+</p><p>
+
+However, there are longer multi-line functions supported by Stirmake that have
+been demonstrated several times already. They use @L before variable name
+if lexical scoping is needed or @D before variable name if dynamic scoping
+is needed. An example:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+$VAR = 1
+$ARG = 2
+@function $FUN1($ARG)
+  @locvar $VAR = 5
+  @dump($ARG)
+  @dump(@L$ARG)
+  @dump(@D$ARG)
+  @dump($VAR)
+  @dump(@L$VAR)
+  @dump(@D$VAR)
+@endfunction
+@beginscope
+  $VAR = 3
+  $ARG = 4
+  @call $FUN1(6)
+@endscope
+</pre><p>
+
+It is recommended for the reader to guess what the function prints before
+running it.
+
+</p><p>
+
+Note that calling functions is similar to accessing a variable. The scoping
+must be specified, or else $FUN1(6) would refer to calling a local variable
+$FUN1 having a function with argument 6. Since functions cannot be defined as
+local variables, this is guaranteed to fail (unless a local variable function
+pointer is created). Note that code outside functions (like the @call $FUN1(6))
+and code in single-line &lt;&gt; delayed evaluation functions uses dynamic
+scoping by default and then the concept of local variables is meaningless. An
+example of calling a function using dynamic and lexical scoping:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+@function $FUN1($ARG)
+  @dump(@L$FUN2($ARG))
+  @dump(@D$FUN2($ARG))
+@endfunction
+@function $FUN2($ARG)
+  @return 1+$ARG
+@endfunction
+@beginscope
+  @function $FUN2($ARG)
+    @return 2+$ARG
+  @endfunction
+  @call $FUN1(6)
+@endscope
+</pre><p>
+
+Again, it is recommended for the reader to guess what this prints, and only
+afterwards run it.
+
+</p><p>
+
+The built-ins specified by @ are different: they are not defined in any scope
+but are built-ins instead. Function pointers to built-ins cannot be done, but
+it's always possible to create a function which only calls a built-in and
+then create function pointers to the call-built-in function:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+@function $STRREVERSE($ARG)
+  @return @strreverse($ARG)
+@endfunction
+
+$FUNPOINTER1=$STRREVERSE
+
+@beginscope
+  $FUNPOINTER2=$STRREVERSE
+  @call @dump($FUNPOINTER1("abc"))
+  @call @dump($FUNPOINTER2("abc"))
+@endscope
+</pre><p>
+
+</p>
+    </div>
+  </div><div class="navfooter"><hr /><table width="100%" summary="Navigation footer"><tr><td width="40%" align="left"><a accesskey="p" href="ch03.html">Prev</a> </td><td width="20%" align="center"><a accesskey="u" href="pt02.html">Up</a></td><td width="40%" align="right"> <a accesskey="n" href="ch05.html">Next</a></td></tr><tr><td width="40%" align="left" valign="top">Chapter 3. Introducing stirmake </td><td width="20%" align="center"><a accesskey="h" href="index.html">Home</a></td><td width="40%" align="right" valign="top"> Chapter 5. How Stirmake executes its commands</td></tr></table></div></body></html>
