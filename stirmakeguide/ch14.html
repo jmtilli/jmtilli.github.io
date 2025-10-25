@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Chapter 14. Advanced tricks</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="home" href="index.html" title="Scalable true implementation of recursive make (stirmake), user's guide" /><link rel="up" href="pt04.html" title="Part IV. Advanced stirmake programming" /><link rel="prev" href="ch13.html" title="Chapter 13. Programming Stirmake with Amyplan" /></head><body><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter 14. Advanced tricks</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch13.html">Prev</a> </td><th width="60%" align="center">Part IV. Advanced stirmake programming</th><td width="20%" align="right"> </td></tr></table><hr /></div><div class="chapter"><div class="titlepage"><div><div><h2 class="title"><a id="advancedtricks"></a>Chapter 14. Advanced tricks</h2></div></div></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="ch14.html#idp45">Order-only dependencies</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp46">Separate build directory</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp47">Pattern rules</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp48">Scopes stored in variables</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp49">Function data types and builtin wrappers</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp50">@deponly for additional dependencies</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp51">@order and @wait</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp52">Dynamically adding dependencies</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp53">Dynamically adding rules</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp54">Finding stirmake version and version history</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp55">Version conditionals and minimum version requirements, future builtins</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp56">Hacking abce</a></span></dt></dl></div>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Chapter 14. Advanced tricks</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="home" href="index.html" title="Scalable true implementation of recursive make (stirmake), user's guide" /><link rel="up" href="pt04.html" title="Part IV. Advanced stirmake programming" /><link rel="prev" href="ch13.html" title="Chapter 13. Programming Stirmake with Amyplan" /></head><body><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter 14. Advanced tricks</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch13.html">Prev</a> </td><th width="60%" align="center">Part IV. Advanced stirmake programming</th><td width="20%" align="right"> </td></tr></table><hr /></div><div class="chapter"><div class="titlepage"><div><div><h2 class="title"><a id="advancedtricks"></a>Chapter 14. Advanced tricks</h2></div></div></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="ch14.html#idp46">Order-only dependencies</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp47">Separate build directory</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp48">Pattern rules</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp49">Scopes stored in variables</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp50">Function data types and builtin wrappers</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp51">@deponly for additional dependencies</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp52">@order and @wait</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp53">Dynamically adding dependencies</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp54">Dynamically adding rules</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp55">Finding stirmake version and version history</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp56">Version conditionals and minimum version requirements, future builtins</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp57">Hacking abce</a></span></dt></dl></div>
     
-    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp45"></a>Order-only dependencies</h2></div></div></div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp46"></a>Order-only dependencies</h2></div></div></div>
       
 <p>
 
@@ -44,7 +44,7 @@ dependency.
 
 </p>
     </div>
-    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp46"></a>Separate build directory</h2></div></div></div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp47"></a>Separate build directory</h2></div></div></div>
       
 <p>
 
@@ -103,12 +103,15 @@ add a string prefix to all array entries.
 
 </p>
     </div>
-    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp47"></a>Pattern rules</h2></div></div></div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp48"></a>Pattern rules</h2></div></div></div>
       
 <p>
 
 Pattern rules have been mentioned numerous times in the examples of this
-stirmake guide. However, it is important here to document their semantics.
+stirmake guide. However, it is important here to document their semantics.  The
+documented semantics are the semantics after git commit
+eac397e190032848ff8da30c348b86d6708233ae, and the semantics have recently
+changed.
 
 </p><p>
 
@@ -139,6 +142,66 @@ the default case it is cleaned along with object files (smka -c).
 
 </p><p>
 
+Note also that pattern rules may use variables and expressions as targets
+and dependencies. Example dependencies:
+</p><pre class="programlisting">
+$(LIBS) = ['libstirmake.a', 'abce/libabce.a']
+@patrule @distrule: $(PROG): '%': '%.o' $(LIBS)
+@	[@$(CC), @$(CFLAGS), "-o", $@, $&lt;, 'libstirmake.a', 'abce/libabce.a', @$(LUALIBS), '-lm', '-ldl']
+</pre><p>
+Here $(LIBS) is outside parentheses, so every member of $(LIBS) is scanned
+for '%' character and if one '%' character is present, it is filled with
+the material from the base filenames used as wildcard. It is also possible
+to have an arbitrary expression inside parentheses, which disable the
+special processing of the '%' sign, but only if the expression result is an
+array:
+</p><pre class="programlisting">
+$(LIBS) = ['libstirmakereallycontains%sign.a', 'abce/libabce.a']
+@patrule @distrule: $(PROG): '%': '%.o' ($(LIBS))
+@	[@$(CC), @$(CFLAGS), "-o", $@, $&lt;, 'libstirmake.a', 'abce/libabce.a', @$(LUALIBS), '-lm', '-ldl']
+</pre><p>
+...this also does not have the special '%' character meaning
+</p><pre class="programlisting">
+$(LIBS) = ['libstirmakereallycontains%sign.a']
+@patrule @distrule: $(PROG): '%': '%.o' ($(LIBS)) 'abce/libabce.a'
+@	[@$(CC), @$(CFLAGS), "-o", $@, $&lt;, 'libstirmake.a', 'abce/libabce.a', @$(LUALIBS), '-lm', '-ldl']
+</pre><p>
+...but this does, since every isolated string not in an array has special
+'%' character meaning:
+</p><pre class="programlisting">
+$(LIBS) = 'libstirmakereallycontains%sign.a'
+@patrule @distrule: $(PROG): '%': '%.o' ($(LIBS)) 'abce/libabce.a'
+@	[@$(CC), @$(CFLAGS), "-o", $@, $&lt;, 'libstirmake.a', 'abce/libabce.a', @$(LUALIBS), '-lm', '-ldl']
+</pre><p>
+Also note that inside the parentheses, any expression
+is valid so you can have:
+</p><pre class="programlisting">
+@patrule @distrule: $(PROG): '%': '%.o' (['libstirmake%.a', 'abce/libabce.a'])
+@	[@$(CC), @$(CFLAGS), "-o", $@, $&lt;, 'libstirmake.a', 'abce/libabce.a', @$(LUALIBS), '-lm', '-ldl']
+</pre><p>
+...and in this case, the percent sign is part of the dependency name too. So if
+you want to create dependency array programmatically, you have to decide
+whether it's outside parentheses (only direct variable reference allowed,
+special handling for % sign enabled), or inside parantheses (any expression
+allowed, special handling for % sign disabled except if the data type is
+single isolated string in which case special handling is enabled).
+
+</p><p>
+
+It is also possible to use an array with @nil, of length at most 3. In this
+case, the @nil is the wildcard, and you may or may not have string before the
+wildcard and after the wildcard. Example:
+</p><pre class="programlisting">
+@patrule @distrule: $(PROG): ([@nil]): ([@nil, '.o']) (['libstirmake%.a', 'abce/libabce.a'])
+@	[@$(CC), @$(CFLAGS), "-o", $@, $&lt;, 'libstirmake.a', 'abce/libabce.a', @$(LUALIBS), '-lm', '-ldl']
+</pre><p>
+...in this case the target is the basename extracted from $(PROG) members, and
+dependency is basename with '.o' appended to it. Note that there has to be
+exactly one @nil, and you may have one string before it and one after it at
+most.
+
+</p><p>
+
 Expressions can be included in targets or dependencies with parentheses, as
 is evident from this example snippet from the previous section:
 
@@ -152,11 +215,22 @@ is evident from this example snippet from the previous section:
 
 Note that unlike GNU make which supports $* variable, here the second target
 with .d extension is modified by using @sufsubone for the first target. $@ is
-always the first target.
+always the first target. Note also that even though the expression is inside
+parentheses, it is not an array, so special handling for '%' character is
+enabled.
+
+</p><p>
+
+The rules for how special handling of '%' character is enabled or disabled
+are quite complex. They are:
+</p><div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: bullet; "><li class="listitem" style="list-style-type: disc"><p>Every string has special meaning</p></li><li class="listitem" style="list-style-type: disc"><p>Everything outside parentheses has special meaning, string or variable reference to array</p></li><li class="listitem" style="list-style-type: disc"><p>String inside parentheses has special meaning, because every string has special meaning</p></li><li class="listitem" style="list-style-type: disc"><p>Array inside parentheses does not have special meaning</p></li></ul></div><p>
+Note also that array has special meaning for @nil, which is the wildcard
+character intended for arrays. @nil in not a character that could be inside
+a string.
 
 </p>
     </div>
-    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp48"></a>Scopes stored in variables</h2></div></div></div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp49"></a>Scopes stored in variables</h2></div></div></div>
       
 <p>
 
@@ -186,7 +260,7 @@ second named variable after defining it with the first named variable.
 
 </p>
     </div>
-    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp49"></a>Function data types and builtin wrappers</h2></div></div></div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp50"></a>Function data types and builtin wrappers</h2></div></div></div>
       
 <p>
 
@@ -224,7 +298,7 @@ error to use an incorrect number of arguments.
 
 </p>
     </div>
-    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp50"></a>@deponly for additional dependencies</h2></div></div></div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp51"></a>@deponly for additional dependencies</h2></div></div></div>
       
 <p>
 
@@ -262,7 +336,7 @@ the extra added dependency, with @deponly.
 
 </p>
     </div>
-    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp51"></a>@order and @wait</h2></div></div></div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp52"></a>@order and @wait</h2></div></div></div>
       
 <p>
 
@@ -447,7 +521,7 @@ stirmake: *** cycle found, cannot proceed further. Exiting.
 
 </p>
     </div>
-    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp52"></a>Dynamically adding dependencies</h2></div></div></div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp53"></a>Dynamically adding dependencies</h2></div></div></div>
       
 <p>
 
@@ -499,7 +573,7 @@ executed or scheduled for execution.
 
 </p>
     </div>
-    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp53"></a>Dynamically adding rules</h2></div></div></div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp54"></a>Dynamically adding rules</h2></div></div></div>
       
 <p>
 
@@ -638,7 +712,7 @@ Note how the $MODULE function removed a lot of boilerplate code.
 
 </p>
     </div>
-    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp54"></a>Finding stirmake version and version history</h2></div></div></div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp55"></a>Finding stirmake version and version history</h2></div></div></div>
       
 <p>
 
@@ -669,7 +743,7 @@ stirmake -G
 
 </p>
     </div>
-    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp55"></a>Version conditionals and minimum version requirements, future builtins</h2></div></div></div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp56"></a>Version conditionals and minimum version requirements, future builtins</h2></div></div></div>
       
 <p>
 
@@ -733,7 +807,7 @@ but there is no parse error if inside version conditional that is false.
 
 </p>
     </div>
-    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp56"></a>Hacking abce</h2></div></div></div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp57"></a>Hacking abce</h2></div></div></div>
       
 <p>
 

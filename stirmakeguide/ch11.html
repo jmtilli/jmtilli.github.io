@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Chapter 11. Scoping and subdirectories</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="home" href="index.html" title="Scalable true implementation of recursive make (stirmake), user's guide" /><link rel="up" href="pt03.html" title="Part III. Stirmake in large-scale systems" /><link rel="prev" href="ch10.html" title="Chapter 10. Make revolution, one project at a time" /><link rel="next" href="ch12.html" title="Chapter 12. Example large or complex projects" /></head><body><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter 11. Scoping and subdirectories</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch10.html">Prev</a> </td><th width="60%" align="center">Part III. Stirmake in large-scale systems</th><td width="20%" align="right"> <a accesskey="n" href="ch12.html">Next</a></td></tr></table><hr /></div><div class="chapter"><div class="titlepage"><div><div><h2 class="title"><a id="scopingandsubdirectories"></a>Chapter 11. Scoping and subdirectories</h2></div></div></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="ch11.html#lexdyn">Lexical and dynamic scoping</a></span></dt><dt><span class="sect1"><a href="ch11.html#creatingscopes">Creating new scopes, and holey scopes</a></span></dt><dt><span class="sect1"><a href="ch11.html#namedscopes">Named scopes and accessing them</a></span></dt><dt><span class="sect1"><a href="ch11.html#dirupdirdown">Specifying library lists that work everywhere</a></span></dt></dl></div>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Chapter 11. Scoping and subdirectories</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="home" href="index.html" title="Scalable true implementation of recursive make (stirmake), user's guide" /><link rel="up" href="pt03.html" title="Part III. Stirmake in large-scale systems" /><link rel="prev" href="ch10.html" title="Chapter 10. Make revolution, one project at a time" /><link rel="next" href="ch12.html" title="Chapter 12. Example large or complex projects" /></head><body><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter 11. Scoping and subdirectories</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch10.html">Prev</a> </td><th width="60%" align="center">Part III. Stirmake in large-scale systems</th><td width="20%" align="right"> <a accesskey="n" href="ch12.html">Next</a></td></tr></table><hr /></div><div class="chapter"><div class="titlepage"><div><div><h2 class="title"><a id="scopingandsubdirectories"></a>Chapter 11. Scoping and subdirectories</h2></div></div></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="ch11.html#lexdyn">Lexical and dynamic scoping</a></span></dt><dt><span class="sect1"><a href="ch11.html#creatingscopes">Creating new scopes, and holey scopes</a></span></dt><dt><span class="sect1"><a href="ch11.html#namedscopes">Named scopes and accessing them</a></span></dt><dt><span class="sect1"><a href="ch11.html#dirupdirdown">Specifying library lists that work everywhere</a></span></dt><dt><span class="sect1"><a href="ch11.html#idp28">Pathnames</a></span></dt></dl></div>
     
     <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="lexdyn"></a>Lexical and dynamic scoping</h2></div></div></div>
       
@@ -309,6 +309,45 @@ correct path to libcommon.a.
 This way, library linking with relative paths is easy. Also it is possible to
 use the same way to construct include directory arguments to C compiler (-I
 argument).
+
+</p>
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp28"></a>Pathnames</h2></div></div></div>
+      
+<p>
+
+Stirmake uses relative pathnames for practically everything. However, in some
+situation it might be helpful to convert a relative pathname into an absolute
+pathname. Support for it is provided via @abspath. Similarly, you may want to
+simplify a pathname but keep it relative, eliminating unneeded . and .. in the
+path, but keeping all symbolic links. This is possible via @pathsimplify.
+Basenames and suffixes can be extracted via @pathbasename and @pathsuffix. Note
+how the basename is defined as everything before the suffix, so it's different
+from C language basename() function call that includes the suffix too. In
+stirmake, @pathnotdir is similar to C language basename() if the string does
+not end in "/", but if it does, the result is empty string. Complementary to
+@pathnotdir, there is @pathdir which extracts the directory portion of the
+path. Some of these can be done for arrays: @pathsimplifyall, @pathdirall,
+@pathnotdirall, @pathbasenameall, @pathsuffixall.
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all':
+@call @dump(@abspath(".")) # absolute pathname
+@call @dump(@pathsimplify("foo/../bar")) # bar
+@call @dump(@pathsimplifyall(["foo/../bar", "foo/./bar"])) # ["bar", "foo/bar"]
+@call @dump(@pathdir("foo/../bar")) # foo/../
+@call @dump(@pathdir("foo/../bar/")) # foo/../bar/
+@call @dump(@pathdirall(["foo/../bar", "foo/../bar/"])) # ["foo/../", "foo/../bar/"]
+@call @dump(@pathnotdir("foo/../bar")) # bar
+@call @dump(@pathnotdir("foo/../bar/")) # empty string ("")
+@call @dump(@pathnotdirall(["foo/../bar", "foo/../bar/"])) # ["bar", ""]
+@call @dump(@pathbasename("foo/../bar.c")) # *"foo/../bar"
+@call @dump(@pathbasenameall(["foo/../bar.c", "baz.c"])) # ["foo/../bar", "baz"]
+@call @dump(@pathsuffix("foo/../bar.c")) # ".c"
+@call @dump(@pathsuffixall(["foo/../bar.c", "bar.h"])) # [".c", ".h"]
+</pre><p>
 
 </p>
     </div>
