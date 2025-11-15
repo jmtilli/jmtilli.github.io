@@ -891,6 +891,57 @@ $ARRAY=[@$ARRAY,4,5,6]
 @call @dump($ARRAY)
 </pre><p>
 
+Arrays of strings can be filtered to select items that have (or don't have) a
+certain prefix or suffix, or based on regular expressions. For example,
+filenames having certain extensions can be filtered or filtered out:
+</p><pre class="programlisting">
+@toplevel
+@strict
+$ARRAY=["a.c", "b.h", "c"]
+$C=@suffilter($ARRAY, ".c")
+$H=@suffilter($ARRAY, ".h")
+$NOC=@suffilterout($ARRAY, ".c")
+$NOH=@suffilterout($ARRAY, ".h")
+@phonyrule: 'all':
+@call @dump($C)
+@call @dump($H)
+@call @dump($NOC)
+@call @dump($NOH)
+</pre><p>
+
+Prefix filtering works too on recent-enough versions of Stirmake:
+</p><pre class="programlisting">
+@toplevel
+@strict
+$ARRAY=["a.c", "b.h", "c"]
+$A=@prefilter($ARRAY, "a")
+$B=@prefilter($ARRAY, "b")
+$NOA=@prefilterout($ARRAY, "a")
+$NOB=@prefilterout($ARRAY, "b")
+@phonyrule: 'all':
+@call @dump($A)
+@call @dump($B)
+@call @dump($NOA)
+@call @dump($NOB)
+</pre><p>
+
+Regular expression filtering works with @regfilter and @eregfilter for basic
+and extended regular expressions:
+</p><pre class="programlisting">
+@toplevel
+@strict
+$ARRAY=["a.c", "b.h", "c"]
+$C=@eregfilter($ARRAY, @true, "\\.cc?$")
+$H=@regfilter($ARRAY, @true, "\\.h$")
+$NOC=@eregfilter($ARRAY, @false, "\\.cc?$")
+$NOH=@regfilter($ARRAY, @false, "\\.h$")
+@phonyrule: 'all':
+@call @dump($C)
+@call @dump($H)
+@call @dump($NOC)
+@call @dump($NOH)
+</pre><p>
+
 </p>
     </div>
     <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="simpletypes"></a>Simple data types: number, boolean, nil</h2></div></div></div>
