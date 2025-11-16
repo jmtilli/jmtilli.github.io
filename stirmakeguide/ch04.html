@@ -942,6 +942,18 @@ $NOH=@regfilter($ARRAY, @false, "\\.h$")
 @call @dump($NOH)
 </pre><p>
 
+String lists can be filtered and filtered out with @filter and @filterout:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+@call @dump(@filter(["a", "b", "c"], ["b"]))
+@call @dump(@filterout(["a", "b", "c"], ["b"]))
+@call @dump(@filter(["a", "b", "c"], ["a", "c"]))
+@call @dump(@filterout(["a", "b", "c"], ["a", "c"]))
+@phonyrule: 'all':
+</pre><p>
+
 </p>
     </div>
     <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="simpletypes"></a>Simple data types: number, boolean, nil</h2></div></div></div>
