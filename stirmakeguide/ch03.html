@@ -165,6 +165,23 @@ argument:
 
 </p><p>
 
+Note that shell special characters can give trouble. In newer versions of
+stirmake, there is support for @shellescape:
+</p><pre class="programlisting">
+@toplevel
+@strict
+@phonyrule: 'all': 'hello'
+'hello': 'hello.c'
+@	["sh", "-c", "cc -o " . @shellescape($@) . " " . @shellescape($&lt;)]
+</pre><p>
+
+</p><p>
+
+Note @shellescape only works for individual strings, not for arrays of strings.
+For arrays of strings, you would use @shellescapemulti.
+
+</p><p>
+
 The second is to invoke it the same way as with make, omitting the @ character
 before tabulator:
 </p><pre class="programlisting">
