@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Chapter 14. Advanced tricks</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="home" href="index.html" title="Scalable true implementation of recursive make (stirmake), user's guide" /><link rel="up" href="pt04.html" title="Part IV. Advanced stirmake programming" /><link rel="prev" href="ch13.html" title="Chapter 13. Programming Stirmake with Amyplan" /></head><body><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter 14. Advanced tricks</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch13.html">Prev</a> </td><th width="60%" align="center">Part IV. Advanced stirmake programming</th><td width="20%" align="right"> </td></tr></table><hr /></div><div class="chapter"><div class="titlepage"><div><div><h2 class="title"><a id="advancedtricks"></a>Chapter 14. Advanced tricks</h2></div></div></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="ch14.html#idp46">Order-only dependencies</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp47">Separate build directory</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp48">Pattern rules</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp49">Scopes stored in variables</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp50">Function data types and builtin wrappers</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp51">@deponly for additional dependencies</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp52">@order and @wait</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp53">Dynamically adding dependencies</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp54">Dynamically adding rules</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp55">Finding stirmake version and version history</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp56">Version conditionals and minimum version requirements, future builtins</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp57">Hacking abce</a></span></dt></dl></div>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Chapter 14. Advanced tricks</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.1" /><link rel="home" href="index.html" title="Scalable true implementation of recursive make (stirmake), user's guide" /><link rel="up" href="pt04.html" title="Part IV. Advanced stirmake programming" /><link rel="prev" href="ch13.html" title="Chapter 13. Programming Stirmake with Amyplan" /></head><body><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Chapter 14. Advanced tricks</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="ch13.html">Prev</a> </td><th width="60%" align="center">Part IV. Advanced stirmake programming</th><td width="20%" align="right"> </td></tr></table><hr /></div><div class="chapter"><div class="titlepage"><div><div><h2 class="title"><a id="advancedtricks"></a>Chapter 14. Advanced tricks</h2></div></div></div><div class="toc"><p><strong>Table of Contents</strong></p><dl class="toc"><dt><span class="sect1"><a href="ch14.html#idp46">Order-only dependencies</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp47">Separate build directory</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp48">Pattern rules</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp49">Scopes stored in variables</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp50">Function data types and builtin wrappers</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp51">@deponly for additional dependencies</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp52">@order and @wait</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp53">Dynamically adding dependencies</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp54">Dynamically adding rules</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp55">Finding stirmake version and version history</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp56">Version conditionals and minimum version requirements, future builtins</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp57">Lua integration</a></span></dt><dt><span class="sect1"><a href="ch14.html#idp58">Hacking abce</a></span></dt></dl></div>
     
     <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp46"></a>Order-only dependencies</h2></div></div></div>
       
@@ -807,7 +807,190 @@ but there is no parse error if inside version conditional that is false.
 
 </p>
     </div>
-    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp57"></a>Hacking abce</h2></div></div></div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp57"></a>Lua integration</h2></div></div></div>
+      
+<p>
+
+As explained earlier, stirmake may optionally be compiled with Lua support:
+with official Lua or with LuaJIT. If Lua support is compiled in, Lua code
+can be embedded to stirfiles as follows:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+
+@phonyrule: 'all':
+
+%lua{
+
+function fibonacci(x)
+  if x &lt; 1 then
+    return 1
+  end
+  return fibonacci(x-1) + fibonacci(x-2)
+end
+
+%}
+
+@call @dump(@dynluacall("fibonacci", 5))
+</pre><p>
+
+</p><p>
+
+Note that @dynluacall calls Lua using the dynamic scope, which in this case is
+equivalent to lexical scope. However, if you define an Amyplan function in
+scope A, call it from scope B, and the Amyplan function calls Lua, then a
+dynamic call to Lua from that Amyplan function would use scope B and a lexical
+call would use scope A. The lexical call would be made with @lexluacall.
+
+</p><p>
+
+Lua can get and set variables, dynamically or lexically. Example of getting
+variables:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+
+@phonyrule: 'all':
+
+$A = 1
+
+%lua{
+function luafun(varname)
+  print(Abce.getlexval(varname))
+  print(Abce.getdynval(varname))
+end
+%}
+
+@function $AMYPLANFUN()
+  @lexluacall("luafun", "A")
+@endfunction
+
+@beginscope
+$A = 2
+@call $AMYPLANFUN()
+@endscope
+</pre><p>
+
+This Stirfile prints first 1 and then 2, if Lua support is compiled in. Note
+that since Lua lacks recursive nested scoping, the only way to call the Lua
+function from the sub-scope is to call an Amyplan function that is in the
+parent scope, and the Amyplan function then calls the Lua function. Lua in the
+child scope does not see Lua definitions made in the parent scope. Note that
+some older Stirmake versions require at least one argument to Lua functions,
+but most recent code supports zero arguments too.
+
+</p><p>
+
+It is also possible to set variables from Lua:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+
+@phonyrule: 'all':
+
+$A = @nil
+
+%lua{
+function luafun(varname)
+  print(Abce.setlexval(varname, "LEX"))
+  print(Abce.setdynval(varname, "DYN"))
+end
+%}
+
+@function $AMYPLANFUN()
+  @lexluacall("luafun", "A")
+@endfunction
+
+@beginscope
+$A = @nil
+@call $AMYPLANFUN()
+@call @dump($A)
+@call @dump(@LP$A)
+@endscope
+</pre><p>
+
+This program prints first LEX and then DYN.
+
+</p><p>
+
+Lua can call Amyplan functions:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+
+@phonyrule: 'all':
+
+@function $AMYPLANDUMP($x)
+  @dump($x)
+  @return [1,2,3]
+@endfunction
+
+%lua{
+function luafun(dummy)
+  local res=Abce.makelexcall("AMYPLANDUMP", {1,2,{a=3, b=4}})
+  print(res[2])
+end
+%}
+
+@call @dynluacall("luafun", @nil)
+</pre><p>
+
+This program prints first [1, 2, {"a": 3, "b": 4}] and then 2. Note that to
+call an Amyplan function not in the lexical scope but in the dynamic scope, you
+would use Abce.makedyncall.
+
+</p><p>
+
+Lua cannot add rules or dependencies directly, but since Lua can call
+Amyplan functions, you can always define Amyplan wrappers that allow
+programmatically adding rules or dependencies from Lua. How to do that:
+
+</p><pre class="programlisting">
+@toplevel
+@strict
+
+@phonyrule: 'all':
+@phonyrule: 'echo':
+@	["echo", "foo"]
+
+@function $LUADEP($tgts, $deps, $opts)
+  @if((@type($opts)==@type([])) &amp;&amp; ($opts[]==0))
+    $opts={}
+  @endif
+  @adddeps($tgts, $deps, $opts)
+@endfunction
+
+%lua{
+function luafun(dummy)
+  Abce.makelexcall("LUADEP", {"all"}, {"echo"}, {})
+end
+%}
+
+@call @dynluacall("luafun", @nil)
+</pre><p>
+
+Note how in Lua the empty array and dictionary are the same, so Stirmake has to
+make a choice to convert it to an array or to a dictionary, and it made the
+choice to convert it to an empty array. In the case of the third $opts
+argument, the choice was incorrect, so the $LUADEP function needs to check for
+its argument being an empty array, and if so, replace it with an empty
+dictionary instead.
+
+</p><p>
+
+Adding rules from Lua is similar: you would define $LUARULE Amyplan function
+which calls @addrule. Then Lua can call the $LUARULE function and add rules via
+it. Note again that an empty dictionary is converted to an empty array, which
+could cause problems and may need to be solved separately in the $LUARULE
+function.
+
+</p>
+    </div>
+    <div class="sect1"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="idp58"></a>Hacking abce</h2></div></div></div>
       
 <p>
 
