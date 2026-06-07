@@ -13,7 +13,7 @@ own.</p>
 
 <p>Total code line counts:
 <ul>
-<li>C: 154 KSLOC</li>
+<li>C: 160 KSLOC</li>
 <li>Java: 39 KSLOC</li>
 <li>Matlab/Octave: 18 KSLOC</li>
 <li>Docbook: 8 KSLOC</li>
@@ -126,6 +126,19 @@ queue.</p>
 
 <p>The user interface is simply a set of scripts managing the queue from a Unix
 shell, and a set of scripts controlling the player.</p>
+
+<h2>Quictest: code to extract server name indication (SNI) from QUIC protocol packets (6 KSLOC C)</h2>
+
+<p><a href="https://github.com/jmtilli/quictest">Quictest in Github</a></p>
+
+<p>Quictest is a prototype code for extracting the server name indication (SNI)
+from initial QUIC protocol packets using the C language. The code has been
+designed to adapt to all possible segmentation/fragmentation of the data
+packets, including even pathological cases not occurring in real life but
+permitted by the protocol. The code also has custom cryptography implementation
+that make it independent of OpenSSL or other huge libraries, while at the same
+time supporting AES-NI instruction set on Intel/AMD machines for high
+performance.</p>
 
 <h2>Nordea-GNUCash: Importing Nordea portfolio exports into GNUCash (100 SLOC Python, 100 SLOC Perl, 100 SLOC Bourne shell)</h2>
 
