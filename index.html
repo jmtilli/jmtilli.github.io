@@ -13,7 +13,7 @@ own.</p>
 
 <p>Total code line counts:
 <ul>
-<li>C: 153 KSLOC</li>
+<li>C: 154 KSLOC</li>
 <li>Java: 39 KSLOC</li>
 <li>Matlab/Octave: 18 KSLOC</li>
 <li>Docbook: 8 KSLOC</li>
@@ -287,6 +287,19 @@ portfolio value and the past transactions are enought to calculate it. One
 drawback of the current MWRR script is that it has hardcoded some account
 numbers that refer to my GNUCash file, so use with other people's GNUCash
 accounting does in fact require minor changes.</p>
+
+<h2>fastdiv: fast division by invariant integers using multiplication (800 SLOC C, 100 SLOC Bourne shell)</h2>
+
+<p><a href="https://github.com/jmtilli/fastdiv">fastdiv in Github</a></p>
+
+<p>fastdiv is a C language library that divides a 32-bit integer by another
+rarely varying or invariant 31-bit integer (represented as a 32-bit integer but
+it must fit into 31 bits). For compile-time invariant integers, the compiler is
+probably already doing the same with higher optimization levels. However, if
+the integer is not compile-time invariant, but changes only very rarely or
+never at all, fastdiv can improve performance. Also, modulo and div+mod
+operations are available. The code has been manually disassembled from the
+compiler output, thus explaining some of the variable names in the code.</p>
 
 <h2>nmsynproxy: Netmap SYN proxy (16 KSLOC C)</h2>
 
