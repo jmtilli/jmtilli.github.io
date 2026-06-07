@@ -17,9 +17,11 @@ own.</p>
 <li>Java: 39 KSLOC</li>
 <li>Matlab/Octave: 18 KSLOC</li>
 <li>Docbook: 8 KSLOC</li>
-<li>Python: 3 KSLOC</li>
+<li>Python: 4 KSLOC</li>
 <li>Roff: 2 KSLOC</li>
 <li>JavaScript: 1 KSLOC</li>
+<li>Bourne shell: 1 KSLOC</li>
+<li>Perl: 100 SLOC</li>
 </ul>
 </p>
 
@@ -36,7 +38,7 @@ the idea of traditional make. For understanding why stirmake is necessary, read
 <a href="http://aegis.sourceforge.net/auug97.pdf">"Recursive Make Considered
 Harmful"</a> and try to follow its instructions. Here is the user's guide of stirmake which is the most comprehensive document about it.</p>
 
-<h2>CamFTPD (1 KSLOC C)</h2>
+<h2>CamFTPD (1 KSLOC C, 100 SLOC Bourne shell)</h2>
 
 <p><a href="https://github.com/jmtilli/camftpd">CamFTPD in Github</a></p>
 
@@ -110,7 +112,7 @@ approach for small structures. So for example a database dump containing
 billion objects can be parsed in an event-based manner but each object can be
 parsed into a tree.</p>
 
-<h2>MPloop (3 KSLOC Python, 3 KSLOC C, 700 SLOC Roff)</h2>
+<h2>MPloop (3 KSLOC Python, 3 KSLOC C, 700 SLOC Roff, 100 SLOC Bourne shell)</h2>
 
 <p><a href="https://github.com/jmtilli/mploop">MPloop in Github</a></p>
 
@@ -125,7 +127,18 @@ queue.</p>
 <p>The user interface is simply a set of scripts managing the queue from a Unix
 shell, and a set of scripts controlling the player.</p>
 
-<h2>Pretty floating point to ASCII (prettyftoa) (400 SLOC C)</h2>
+<h2>Nordea-GNUCash: Importing Nordea portfolio exports into GNUCash (100 SLOC Python, 100 SLOC Perl, 100 SLOC Bourne shell)</h2>
+
+<p><a href="https://github.com/jmtilli/nordeagnucash">Nordea-GNUCash in Github</a></p>
+
+<p>Nordea-GNUCash is a set of scripts for importing Nordea's portfolio exports
+into GNUCash. The process is two-staged: firstly, the data is imported using
+shell and Python scripts into text file databases from a CSV file, then Perl
+module that GNUCash loads imports those text file databases into GNUCash.
+Unfortunately, currency values may not currently be imported directly, but they
+must be entered into GNUCash manually.</p>
+
+<h2>Pretty floating point to ASCII (prettyftoa) (400 SLOC C, 100 SLOC Bourne shell)</h2>
 
 <p><a href="https://github.com/jmtilli/prettyftoa">prettyftoa in Github</a></p>
 
@@ -140,7 +153,7 @@ instead of "0.2". The pretty ftoa library attempts to find the shortest
 the same number and that clearly demonstrates the number is a floating point
 number and not an integer.</p>
 
-<h2>Streaming ASCII-to-floating-point (streamingatof) (1 KSLOC C)</h2>
+<h2>Streaming ASCII-to-floating-point (streamingatof) (1 KSLOC C, 100 SLOC Bourne shell)</h2>
 
 <p><a href="https://github.com/jmtilli/streamingatof">streamingatof in Github</a></p>
 
@@ -157,7 +170,7 @@ unbounded sizes to handle numbers such as 1e0, 10e-1, 100e-2, 1000e-3,
 representations that grow without bound. Streaming atof is designed to handle
 all those use cases where standard atof() fails.</p>
 
-<h2>caj: C API for JSON (9 KSLOC C)</h2>
+<h2>caj: C API for JSON (9 KSLOC C, 200 SLOC Bourne shell)</h2>
 
 <p><a href="https://github.com/jmtilli/caj">caj in Github</a></p>
 
@@ -189,7 +202,7 @@ containing billion objects can be parsed in an event-based manner but each
 object can be parsed into a tree. This allows using JSON for huge database
 dumps, and JSON is a far better serialization format than XML.</p>
 
-<h2>abce and Amyplan: a bytecode engine and a modifiable yacc-based language (22 KSLOC C)</h2>
+<h2>abce and Amyplan: a bytecode engine and a modifiable yacc-based language (22 KSLOC C, 100 SLOC Bourne shell)</h2>
 
 <p><a href="https://github.com/Aalto5G/abce">abce in Github (Aalto5G)</a>, <a
 href="https://github.com/jmtilli/abce">author's fork of abce</a></p>
@@ -201,7 +214,7 @@ meaning compiler can directly emit operations without reordering. A modifiable
 yacc-based programming language (Amyplan) is the programming language for
 writing abce programs.</p>
 
-<h2>stirmake: scalable true implementation of recursive make (22 KSLOC C, 1 KSLOC Roff)</h2>
+<h2>stirmake: scalable true implementation of recursive make (22 KSLOC C, 1 KSLOC Roff, 200 SLOC Bourne shell)</h2>
 
 <p><a href="https://github.com/Aalto5G/stirmake">stirmake in Github
 (Aalto5G)</a>, <a href="https://github.com/jmtilli/stirmake">author's fork of
@@ -256,6 +269,24 @@ ldpairall</a></p>
 
 <p>The L Data Plane Airwall offers improved NAT traversal with no security
 policy. It is a prototype of an application layer NAT technology.</p>
+
+<h2>MWRR: Money weighted rate of return calculator script (600 SLOC Python)</h2>
+
+<p><a href="https://github.com/jmtilli/mwrr">MWRR in Github</a></p>
+
+<p>MWRR is a Python script to calculate money-weighted rate of return from a
+GNUCash file. Money-weighted rate of return gives one number, annual return,
+for the entire investment period, as opposed to time-weighted rate of return
+that gives one number for every day (and thus can be plotted into a graph). As
+the name says, money-weighted rate of return is weighted by money, so the
+periods where more money was invested than average have a higher weight in the
+calculation. The reason money-weighted rate of return is so useful is that you
+don't need to have accurate price data for every day when even a single
+transaction was made (which time-weighted rate of return requires), but current
+portfolio value and the past transactions are enought to calculate it. One
+drawback of the current MWRR script is that it has hardcoded some account
+numbers that refer to my GNUCash file, so use with other people's GNUCash
+accounting does in fact require minor changes.</p>
 
 <h2>nmsynproxy: Netmap SYN proxy (16 KSLOC C)</h2>
 
