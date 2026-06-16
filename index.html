@@ -19,8 +19,8 @@ own.</p>
 <li>Docbook: 8 KSLOC</li>
 <li>Yacc: 7 KSLOC</li>
 <li>Python: 4 KSLOC</li>
+<li>JavaScript: 3 KSLOC</li>
 <li>Roff: 2 KSLOC</li>
-<li>JavaScript: 1 KSLOC</li>
 <li>Bourne shell: 1 KSLOC</li>
 <li>Lex: 1 KSLOC</li>
 <li>Perl: 100 SLOC</li>
@@ -28,6 +28,25 @@ own.</p>
 </p>
 
 <img src="picture2.jpg" alt="Photo of Juha-Matti Tilli" width="288" height="288" />
+
+<h2>nodejsonfrag (2 KSLOC JavaScript)</h2>
+
+<p><a href="https://github.com/jmtilli/nodejsonfrag">nodejsonfrag in Github</a></p>
+
+<p>Typically, JSON is parsed by a tree-based parser and almost never by an
+event-based parser. Event-based parsers are fast and have a low memory
+footprint, but a drawback is that it is cumbersome to write the required event
+handlers. Tree-based parsers make the code easier to write, to understand and
+to maintain but have a large memory footprint as a drawback. Usually, JSON is
+not used for huge files such as database dumps that necessitate event-based
+parsing, or so it would appear at a glance, because a tree-based parser cannot
+hold the whole parse tree in memory at the same time, and event-based parsing
+is not available in common libraries. NodeJSONFrag allows JSON to be parsed by
+event-based approach from the top, but optionally allowing switching to a
+tree-based approach for small structures. So for example a database dump
+containing billion objects can be parsed in an event-based manner but each
+object can be parsed into a tree. This allows using JSON for huge database
+dumps, and JSON is a far better serialization format than XML.</p>
 
 <h2>stirmake user's guide (8 KSLOC Docbook)</h2>
 
