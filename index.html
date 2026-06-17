@@ -1,33 +1,164 @@
 <!DOCTYPE html>
 
-<html><head><title>jmtilli.github.io</title></head><body>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>jmtilli.github.io</title>
+<style>
+:root{--max-w:1100px;--accent:#0b63d6;--muted:#58606a;}
+*{box-sizing:border-box}
+body{font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;line-height:1.5;margin:0;background:#f3f6fb;color:#101217}
+.main-container{max-width:var(--max-w);margin:28px auto;padding:26px;background:#fff;border-radius:12px;box-shadow:0 8px 30px rgba(16,22,32,0.07)}
+.header{display:flex;gap:16px;align-items:center;margin-bottom:12px}
+.header img{width:96px;height:96px;object-fit:cover;border-radius:8px;border:1px solid #e6e9ee}
+h1{font-size:1.25rem;margin:0}
+.search{margin:12px 0;display:flex;gap:8px}
+.search input{flex:1;padding:8px 10px;border:1px solid #e6e9ee;border-radius:8px;background:#fbfdff}
+.search .note{color:var(--muted);font-size:0.9rem;padding:7px 0 0 6px}
+h2{font-size:1rem;margin:18px 0 6px 0;color:var(--accent);border-bottom:1px dashed #eef2fb;padding-bottom:6px}
+p, li {color:#26323a}
+ul {margin:8px 0 12px 24px}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+img.responsive{max-width:100%;height:auto}
+@media (max-width:700px){.header{flex-direction:column;align-items:flex-start}.main-container{padding:16px}}
 
-<h1>Juha-Matti Tilli's Github portfolio (https://jmtilli.github.io/)</h1>
+/* --- added styles for prettier code counts --- */
+.stats {
+  margin:12px 0;
+  padding:12px;
+  background:linear-gradient(180deg,#ffffff,#fbfdff);
+  border:1px solid #e9f1ff;
+  border-radius:10px;
+}
+.stats .stats-title{font-weight:700;color:#0f2340;margin-bottom:8px}
+.stat-grid{display:flex;flex-wrap:wrap;gap:10px}
+.stat-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:8px;
+  background:#fff;
+  border-radius:8px;
+  border:1px solid #eef6ff;
+  min-width:220px;
+  flex:1 1 260px;
+}
+.stat-meta{width:110px;font-weight:700;color:var(--accent)}
+.bar{flex:1;height:10px;background:#eef6ff;border-radius:8px;overflow:hidden;box-shadow:inset 0 1px 0 rgba(255,255,255,0.6)}
+.bar > span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#66a0ff);width:0;transition:width 480ms cubic-bezier(.2,.9,.3,1)}
+.stat-count{min-width:84px;text-align:right;font-weight:600;color:#0b2b45;font-size:0.95rem}
+.stat-footnote{color:var(--muted);font-size:0.9rem;margin-top:8px}
 
-<p>This is my Github portfolio in a format where repositories are not just
-listed like on the <a href="https://github.com/jmtilli">Github profile page</a>
-but also described in more detail. My Github profile page has also several
-minor repositories that are too unimportant to be listed here, and forks of
-software written by others that I do not want to falsely list here as my
-own.</p>
+/* keep an invisible filler so the last row keeps the same column widths */
+.stat-item.empty{
+  opacity:0;
+  pointer-events:none;
+  user-select:none;
+}
+/* remove the empty block's bar and text so no visible bar appears */
+.stat-item.empty .bar { display: none; }
+.stat-item.empty .stat-meta,
+.stat-item.empty .stat-count { display: none; }
+</style>
+</head>
+<body>
+<main class="main-container">
+<div class="header">
+  <img src="picture2.jpg" alt="Photo of Juha-Matti Tilli" />
+  <div>
+    <h1>Juha‑Matti Tilli — Github portfolio</h1>
+    <div style="color:var(--muted);font-size:0.95rem">A curated view of selected repositories</div>
+  </div>
+</div>
 
-<p>Total code line counts:
-<ul>
-<li>C: 152 KSLOC</li>
-<li>Java: 39 KSLOC</li>
-<li>Matlab/Octave: 18 KSLOC</li>
-<li>Docbook: 8 KSLOC</li>
-<li>Yacc: 7 KSLOC</li>
-<li>Python: 4 KSLOC</li>
-<li>JavaScript: 3 KSLOC</li>
-<li>Roff: 2 KSLOC</li>
-<li>Bourne shell: 1 KSLOC</li>
-<li>Lex: 1 KSLOC</li>
-<li>Perl: 100 SLOC</li>
-</ul>
-</p>
+<!-- prettier code counts -->
+<section class="stats" aria-labelledby="stats-title">
+  <div id="stats-title" class="stats-title">Code composition</div>
 
-<img src="picture2.jpg" alt="Photo of Juha-Matti Tilli" width="288" height="288" />
+  <div class="stat-grid" role="list" aria-hidden="false">
+    <div class="stat-item" role="listitem" data-sloc="152000">
+      <div class="stat-meta">C</div>
+      <div class="bar" aria-hidden="true"><span></span></div>
+      <div class="stat-count" aria-hidden="true">152 KSLOC</div>
+    </div>
+
+    <div class="stat-item" role="listitem" data-sloc="39000">
+      <div class="stat-meta">Java</div>
+      <div class="bar" aria-hidden="true"><span></span></div>
+      <div class="stat-count" aria-hidden="true">39 KSLOC</div>
+    </div>
+
+    <div class="stat-item" role="listitem" data-sloc="18000">
+      <div class="stat-meta">Matlab/Octave</div>
+      <div class="bar" aria-hidden="true"><span></span></div>
+      <div class="stat-count" aria-hidden="true">18 KSLOC</div>
+    </div>
+
+    <div class="stat-item" role="listitem" data-sloc="8000">
+      <div class="stat-meta">Docbook</div>
+      <div class="bar" aria-hidden="true"><span></span></div>
+      <div class="stat-count" aria-hidden="true">8 KSLOC</div>
+    </div>
+
+    <div class="stat-item" role="listitem" data-sloc="7000">
+      <div class="stat-meta">Yacc</div>
+      <div class="bar" aria-hidden="true"><span></span></div>
+      <div class="stat-count" aria-hidden="true">7 KSLOC</div>
+    </div>
+
+    <div class="stat-item" role="listitem" data-sloc="4000">
+      <div class="stat-meta">Python</div>
+      <div class="bar" aria-hidden="true"><span></span></div>
+      <div class="stat-count" aria-hidden="true">4 KSLOC</div>
+    </div>
+
+    <div class="stat-item" role="listitem" data-sloc="3000">
+      <div class="stat-meta">JavaScript</div>
+      <div class="bar" aria-hidden="true"><span></span></div>
+      <div class="stat-count" aria-hidden="true">3 KSLOC</div>
+    </div>
+
+    <div class="stat-item" role="listitem" data-sloc="2000">
+      <div class="stat-meta">Roff</div>
+      <div class="bar" aria-hidden="true"><span></span></div>
+      <div class="stat-count" aria-hidden="true">2 KSLOC</div>
+    </div>
+
+    <div class="stat-item" role="listitem" data-sloc="1000">
+      <div class="stat-meta">Bourne shell</div>
+      <div class="bar" aria-hidden="true"><span></span></div>
+      <div class="stat-count" aria-hidden="true">1 KSLOC</div>
+    </div>
+
+    <div class="stat-item" role="listitem" data-sloc="1000">
+      <div class="stat-meta">Lex</div>
+      <div class="bar" aria-hidden="true"><span></span></div>
+      <div class="stat-count" aria-hidden="true">1 KSLOC</div>
+    </div>
+
+    <div class="stat-item" role="listitem" data-sloc="100">
+      <div class="stat-meta">Perl</div>
+      <div class="bar" aria-hidden="true"><span></span></div>
+      <div class="stat-count" aria-hidden="true">100 SLOC</div>
+    </div>
+
+    <!-- invisible filler so the final row has three columns like the others -->
+    <div class="stat-item empty" role="presentation" aria-hidden="true" data-sloc="0">
+      <div class="stat-meta">&nbsp;</div>
+      <div class="bar" aria-hidden="true"><span></span></div>
+      <div class="stat-count" aria-hidden="true">&nbsp;</div>
+    </div>
+  </div>
+
+  <div class="stat-footnote" aria-hidden="true">Numbers shown for readability (KSLOC = thousands of source lines). Bars show relative share.</div>
+</section>
+
+<div class="search" aria-hidden="false">
+  <input id="project-search" type="search" placeholder="Search projects by name or text (try: XML, JSON, Java, C, QUIC)"/>
+  <div class="note">Type to filter</div>
+</div>
 
 <h2>nodejsonfrag (2 KSLOC JavaScript)</h2>
 
@@ -445,4 +576,68 @@ differential evolution for fitting, and supports quite many data formats.</p>
   <li><a href="https://urn.fi/URN:NBN:fi:aalto-202212146968">Licentiate thesis</a></li>
 </ul>
 
-</body></html>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // build an index of top-level sections: every H2 plus following siblings until next H1/H2
+  const headers = Array.from(document.querySelectorAll('h2'));
+  const sections = headers.map(h => {
+    const nodes = [];
+    let n = h.nextElementSibling;
+    while (n && n.tagName !== 'H1' && n.tagName !== 'H2') {
+      nodes.push(n);
+      n = n.nextElementSibling;
+    }
+    return {header: h, nodes};
+  });
+
+  const input = document.getElementById('project-search');
+  if (input) {
+    input.addEventListener('input', function () {
+      const q = input.value.trim().toLowerCase();
+      sections.forEach(sec => {
+        const text = (sec.header.textContent + ' ' + sec.nodes.map(n=>n.textContent).join(' ')).toLowerCase();
+        const show = q === '' || text.indexOf(q) !== -1;
+        sec.header.style.display = show ? '' : 'none';
+        sec.nodes.forEach(n => n.style.display = show ? '' : 'none');
+      });
+    });
+  }
+
+  // --- render the stats bars for code counts ---
+  // ignore the invisible filler (has class "empty")
+  const statItems = Array.from(document.querySelectorAll('.stat-item')).filter(el => !el.classList.contains('empty'));
+  if (statItems.length) {
+    const vals = statItems.map(el => Number(el.dataset.sloc || 0));
+    const total = vals.reduce((s,v)=>s+v,0) || 1;
+
+    statItems.forEach((el, idx) => {
+      const v = vals[idx];
+      const pct = (v / total) * 100;
+      const span = el.querySelector('.bar > span');
+      // animate bar width
+      if (span) requestAnimationFrame(() => { span.style.width = pct + '%'; });
+
+      // update friendly count + percent
+      const countEl = el.querySelector('.stat-count');
+      if (countEl) {
+        const friendly = v >= 1000 ? (v/1000).toFixed(v%1000===0?0:1) + ' KSLOC' : v + ' SLOC';
+        countEl.innerHTML = friendly + ' <small style="color:var(--muted);font-weight:500;margin-left:6px">' + (Math.round(pct*10)/10) + '%</small>';
+      }
+    });
+
+    // insert total display above footnote
+    const totalDisplay = total >= 1000 ? (total/1000).toFixed(total%1000===0?0:1)+' KSLOC' : total+' SLOC';
+    const foot = document.querySelector('.stat-footnote');
+    if (foot) {
+      const node = document.createElement('div');
+      node.style.fontWeight = '700';
+      node.style.marginTop = '6px';
+      node.textContent = 'Total: ' + totalDisplay;
+      foot.parentNode.insertBefore(node, foot);
+    }
+  }
+});
+</script>
+</main>
+</body>
+</html>
