@@ -593,10 +593,13 @@ document.addEventListener('DOMContentLoaded', function () {
   const input = document.getElementById('project-search');
   if (input) {
     input.addEventListener('input', function () {
-      const q = input.value.trim().toLowerCase();
+      // split query into separate words (tokens) and require all tokens to match
+      const raw = input.value.trim().toLowerCase();
+      const tokens = raw.split(/\s+/).filter(Boolean);
+
       sections.forEach(sec => {
-        const text = (sec.header.textContent + ' ' + sec.nodes.map(n=>n.textContent).join(' ')).toLowerCase();
-        const show = q === '' || text.indexOf(q) !== -1;
+        const hay = (sec.header.textContent + ' ' + sec.nodes.map(n => n.textContent).join(' ')).toLowerCase();
+        const show = tokens.length === 0 || tokens.every(tok => hay.indexOf(tok) !== -1);
         sec.header.style.display = show ? '' : 'none';
         sec.nodes.forEach(n => n.style.display = show ? '' : 'none');
       });
