@@ -79,69 +79,80 @@ img.responsive{max-width:100%;height:auto}
 
   <div class="stat-grid" role="list" aria-hidden="false">
     <div class="stat-item" role="listitem" data-sloc="152000">
+      <input type="checkbox" class="lang" data-lang="c" id="lang-c"/>
       <div class="stat-meta">C</div>
       <div class="bar" aria-hidden="true"><span></span></div>
-      <div class="stat-count" aria-hidden="true">152 KSLOC</div>
+      <div class="stat-count" aria-hidden="true">152K</div>
     </div>
 
     <div class="stat-item" role="listitem" data-sloc="39000">
+      <input type="checkbox" class="lang" data-lang="java" id="lang-java"/>
       <div class="stat-meta">Java</div>
       <div class="bar" aria-hidden="true"><span></span></div>
-      <div class="stat-count" aria-hidden="true">39 KSLOC</div>
+      <div class="stat-count" aria-hidden="true">39K</div>
     </div>
 
     <div class="stat-item" role="listitem" data-sloc="18000">
+      <input type="checkbox" class="lang" data-lang="octave" id="lang-octave"/>
       <div class="stat-meta">Matlab/Octave</div>
       <div class="bar" aria-hidden="true"><span></span></div>
-      <div class="stat-count" aria-hidden="true">18 KSLOC</div>
+      <div class="stat-count" aria-hidden="true">18K</div>
     </div>
 
     <div class="stat-item" role="listitem" data-sloc="8000">
+      <input type="checkbox" class="lang" data-lang="docbook" id="lang-docbook"/>
       <div class="stat-meta">Docbook</div>
       <div class="bar" aria-hidden="true"><span></span></div>
-      <div class="stat-count" aria-hidden="true">8 KSLOC</div>
+      <div class="stat-count" aria-hidden="true">8K</div>
     </div>
 
     <div class="stat-item" role="listitem" data-sloc="7000">
+      <input type="checkbox" class="lang" data-lang="yacc" id="lang-yacc"/>
       <div class="stat-meta">Yacc</div>
       <div class="bar" aria-hidden="true"><span></span></div>
-      <div class="stat-count" aria-hidden="true">7 KSLOC</div>
+      <div class="stat-count" aria-hidden="true">7K</div>
     </div>
 
     <div class="stat-item" role="listitem" data-sloc="4000">
+      <input type="checkbox" class="lang" data-lang="python" id="lang-python"/>
       <div class="stat-meta">Python</div>
       <div class="bar" aria-hidden="true"><span></span></div>
-      <div class="stat-count" aria-hidden="true">4 KSLOC</div>
+      <div class="stat-count" aria-hidden="true">4K</div>
     </div>
 
     <div class="stat-item" role="listitem" data-sloc="3000">
+      <input type="checkbox" class="lang" data-lang="javascript" id="lang-javascript"/>
       <div class="stat-meta">JavaScript</div>
       <div class="bar" aria-hidden="true"><span></span></div>
-      <div class="stat-count" aria-hidden="true">3 KSLOC</div>
+      <div class="stat-count" aria-hidden="true">3K</div>
     </div>
 
     <div class="stat-item" role="listitem" data-sloc="2000">
+      <input type="checkbox" class="lang" data-lang="roff" id="lang-roff"/>
       <div class="stat-meta">Roff</div>
       <div class="bar" aria-hidden="true"><span></span></div>
-      <div class="stat-count" aria-hidden="true">2 KSLOC</div>
+      <div class="stat-count" aria-hidden="true">2K</div>
     </div>
 
     <div class="stat-item" role="listitem" data-sloc="1000">
+      <input type="checkbox" class="lang" data-lang="shell" id="lang-shell"/>
       <div class="stat-meta">Bourne shell</div>
       <div class="bar" aria-hidden="true"><span></span></div>
-      <div class="stat-count" aria-hidden="true">1 KSLOC</div>
+      <div class="stat-count" aria-hidden="true">1K</div>
     </div>
 
     <div class="stat-item" role="listitem" data-sloc="1000">
+      <input type="checkbox" class="lang" data-lang="lex" id="lang-lex"/>
       <div class="stat-meta">Lex</div>
       <div class="bar" aria-hidden="true"><span></span></div>
-      <div class="stat-count" aria-hidden="true">1 KSLOC</div>
+      <div class="stat-count" aria-hidden="true">1K</div>
     </div>
 
     <div class="stat-item" role="listitem" data-sloc="100">
+      <input type="checkbox" class="lang" data-lang="perl" id="lang-perl"/>
       <div class="stat-meta">Perl</div>
       <div class="bar" aria-hidden="true"><span></span></div>
-      <div class="stat-count" aria-hidden="true">100 SLOC</div>
+      <div class="stat-count" aria-hidden="true">100</div>
     </div>
 
     <!-- invisible filler so the final row has three columns like the others -->
@@ -152,7 +163,7 @@ img.responsive{max-width:100%;height:auto}
     </div>
   </div>
 
-  <div class="stat-footnote" aria-hidden="true">Numbers shown for readability (KSLOC = thousands of source lines). Bars show relative share.</div>
+  <div class="stat-footnote" aria-hidden="true">Numbers shown for readability (K = thousands of source lines). Bars show relative share.</div>
 </section>
 
 <div class="search" aria-hidden="false">
@@ -160,7 +171,7 @@ img.responsive{max-width:100%;height:auto}
   <div class="note">Type to filter</div>
 </div>
 
-<h2>nodejsonfrag (2 KSLOC JavaScript)</h2>
+<h2 data-langs="javascript">nodejsonfrag (2 KSLOC JavaScript)</h2>
 
 <p><a href="https://github.com/jmtilli/nodejsonfrag">nodejsonfrag in Github</a>, <a href="https://www.npmjs.com/package/nodejsonfrag">nodejsonfrag in NPM</a></p>
 
@@ -179,7 +190,7 @@ containing billion objects can be parsed in an event-based manner but each
 object can be parsed into a tree. This allows using JSON for huge database
 dumps, and JSON is a far better serialization format than XML.</p>
 
-<h2>stirmake user's guide (8 KSLOC Docbook)</h2>
+<h2 data-langs="docbook">stirmake user's guide (8 KSLOC Docbook)</h2>
 
 <p><a href="https://github.com/jmtilli/stirmakeguide">stirmakeguide in Github</a>, <a href="https://jmtilli.github.io/stirmakeguide/">rendered version of user's guide</a></p>
 
@@ -190,7 +201,7 @@ the idea of traditional make. For understanding why stirmake is necessary, read
 <a href="http://aegis.sourceforge.net/auug97.pdf">"Recursive Make Considered
 Harmful"</a> and try to follow its instructions. Here is the user's guide of stirmake which is the most comprehensive document about it.</p>
 
-<h2>CamFTPD (1 KSLOC C, 100 SLOC Bourne shell)</h2>
+<h2 data-langs="c shell">CamFTPD (1 KSLOC C, 100 SLOC Bourne shell)</h2>
 
 <p><a href="https://github.com/jmtilli/camftpd">CamFTPD in Github</a></p>
 
@@ -207,7 +218,7 @@ is inserting false evidence. However, prior to the timestamps of the false
 evidence, the attacker's true face has already been caught while tampering with
 the network connection.</p>
 
-<h2>RLCTrans (4 KSLOC C)</h2>
+<h2 data-langs="C">RLCTrans (4 KSLOC C)</h2>
 
 <p><a href="https://github.com/jmtilli/rlctrans">RLCTrans in Github</a></p>
 
@@ -228,7 +239,7 @@ does, and it is easy to integrate it with C code which you would use as the
 programming language of choice for developing software running on the control
 microcontrollers anyway.</p>
 
-<h2>nodexmlfrag (1 KSLOC JavaScript)</h2>
+<h2 data-langs="javascript">nodexmlfrag (1 KSLOC JavaScript)</h2>
 
 <p><a href="https://github.com/jmtilli/nodexmlfrag">nodexmlfrag in
 Github</a>, <a href="https://www.npmjs.com/package/nodexmlfrag">nodexmlfrag in NPM</a></p>
@@ -246,7 +257,7 @@ approach for small structures. So for example a database dump containing
 billion objects can be parsed in an event-based manner but each object can be
 parsed into a tree.</p>
 
-<h2>pyxmlfrag (250 SLOC Python)</h2>
+<h2 data-langs="python">pyxmlfrag (250 SLOC Python)</h2>
 
 <p><a href="https://github.com/jmtilli/pyxmlfrag">pyxmlfrag in
 Github</a>, <a href="https://pypi.org/project/pyxmlfrag/">pyxmlfrag in PyPI</a></p>
@@ -264,7 +275,7 @@ approach for small structures. So for example a database dump containing
 billion objects can be parsed in an event-based manner but each object can be
 parsed into a tree.</p>
 
-<h2>MPloop (3 KSLOC Python, 3 KSLOC C, 700 SLOC Roff, 100 SLOC Bourne shell)</h2>
+<h2 data-langs="python c roff shell">MPloop (3 KSLOC Python, 3 KSLOC C, 700 SLOC Roff, 100 SLOC Bourne shell)</h2>
 
 <p><a href="https://github.com/jmtilli/mploop">MPloop in Github</a></p>
 
@@ -279,7 +290,7 @@ queue.</p>
 <p>The user interface is simply a set of scripts managing the queue from a Unix
 shell, and a set of scripts controlling the player.</p>
 
-<h2>Quictest: code to extract server name indication (SNI) from QUIC protocol packets (6 KSLOC C)</h2>
+<h2 data-langs="c">Quictest: code to extract server name indication (SNI) from QUIC protocol packets (6 KSLOC C)</h2>
 
 <p><a href="https://github.com/jmtilli/quictest">Quictest in Github</a></p>
 
@@ -292,7 +303,7 @@ that make it independent of OpenSSL or other huge libraries, while at the same
 time supporting AES-NI instruction set on Intel/AMD machines for high
 performance.</p>
 
-<h2>Nordea-GNUCash: Importing Nordea portfolio exports into GNUCash (100 SLOC Python, 100 SLOC Perl, 100 SLOC Bourne shell)</h2>
+<h2 data-langs="python perl shell">Nordea-GNUCash: Importing Nordea portfolio exports into GNUCash (100 SLOC Python, 100 SLOC Perl, 100 SLOC Bourne shell)</h2>
 
 <p><a href="https://github.com/jmtilli/nordeagnucash">Nordea-GNUCash in Github</a></p>
 
@@ -303,7 +314,7 @@ module that GNUCash loads imports those text file databases into GNUCash.
 Unfortunately, currency values may not currently be imported directly, but they
 must be entered into GNUCash manually.</p>
 
-<h2>Pretty floating point to ASCII (prettyftoa) (400 SLOC C, 100 SLOC Bourne shell)</h2>
+<h2 data-langs="c shell">Pretty floating point to ASCII (prettyftoa) (400 SLOC C, 100 SLOC Bourne shell)</h2>
 
 <p><a href="https://github.com/jmtilli/prettyftoa">prettyftoa in Github</a></p>
 
@@ -318,7 +329,7 @@ instead of "0.2". The pretty ftoa library attempts to find the shortest
 the same number and that clearly demonstrates the number is a floating point
 number and not an integer.</p>
 
-<h2>Streaming ASCII-to-floating-point (streamingatof) (1 KSLOC C, 100 SLOC Bourne shell)</h2>
+<h2 data-langs="c shell">Streaming ASCII-to-floating-point (streamingatof) (1 KSLOC C, 100 SLOC Bourne shell)</h2>
 
 <p><a href="https://github.com/jmtilli/streamingatof">streamingatof in Github</a></p>
 
@@ -335,7 +346,7 @@ unbounded sizes to handle numbers such as 1e0, 10e-1, 100e-2, 1000e-3,
 representations that grow without bound. Streaming atof is designed to handle
 all those use cases where standard atof() fails.</p>
 
-<h2>caj: C API for JSON (9 KSLOC C, 200 SLOC Bourne shell, 100 SLOC Roff)</h2>
+<h2 data-langs="c shell roff">caj: C API for JSON (9 KSLOC C, 200 SLOC Bourne shell, 100 SLOC Roff)</h2>
 
 <p><a href="https://github.com/jmtilli/caj">caj in Github</a></p>
 
@@ -348,7 +359,7 @@ output library allowing outputting JSON from any function; and CAJUNfrag, a
 parser combining the event-driven and tree-based approaches in a flexible
 way.</p>
 
-<h2>javajsonfrag (2 KSLOC Java)</h2>
+<h2 data-langs="java">javajsonfrag (2 KSLOC Java)</h2>
 
 <p><a href="https://github.com/jmtilli/javajsonfrag">javajsonfrag in Github</a></p>
 
@@ -367,7 +378,7 @@ containing billion objects can be parsed in an event-based manner but each
 object can be parsed into a tree. This allows using JSON for huge database
 dumps, and JSON is a far better serialization format than XML.</p>
 
-<h2>abce and Amyplan: a bytecode engine and a modifiable yacc-based language (19 KSLOC C, 2 KSLOC Yacc, 200 SLOC Lex, 100 SLOC Bourne shell)</h2>
+<h2 data-langs="c yacc lex shell">abce and Amyplan: a bytecode engine and a modifiable yacc-based language (19 KSLOC C, 2 KSLOC Yacc, 200 SLOC Lex, 100 SLOC Bourne shell)</h2>
 
 <p><a href="https://github.com/Aalto5G/abce">abce in Github (Aalto5G)</a>, <a
 href="https://github.com/jmtilli/abce">author's fork of abce</a></p>
@@ -379,7 +390,7 @@ meaning compiler can directly emit operations without reordering. A modifiable
 yacc-based programming language (Amyplan) is the programming language for
 writing abce programs.</p>
 
-<h2>stirmake: scalable true implementation of recursive make (17 KSLOC C, 5 KSLOC Yacc, 1 KSLOC Roff, 700 SLOC Lex, 200 SLOC Bourne shell)</h2>
+<h2 data-langs="c yacc roff lex shell">stirmake: scalable true implementation of recursive make (17 KSLOC C, 5 KSLOC Yacc, 1 KSLOC Roff, 700 SLOC Lex, 200 SLOC Bourne shell)</h2>
 
 <p><a href="https://github.com/Aalto5G/stirmake">stirmake in Github
 (Aalto5G)</a>, <a href="https://github.com/jmtilli/stirmake">author's fork of
@@ -393,7 +404,7 @@ the idea of traditional make. For understanding why stirmake is necessary, read
 Harmful"</a> and try to follow its instructions. If you are interested in
 stirmake, you probably want to read its <a href="https://jmtilli.github.io/stirmakeguide/">user's guide</a>.</p>
 
-<h2>jmalloc: variable sized high performance memory allocator (2 KSLOC C)</h2>
+<h2 data-langs="c">jmalloc: variable sized high performance memory allocator (2 KSLOC C)</h2>
 
 <p><a href="https://github.com/Aalto5G/jmalloc">jmalloc in Github
 (Aalto5G)</a>, <a href="https://github.com/jmtilli/jmalloc">author's fork of
@@ -404,7 +415,7 @@ faster than standard Linux allocator. It is on a totally different location of
 the high performance - low fragmentation scale, wasting memory but saving CPU
 time. In contrast, other allocators waste CPU time but save memory.</p>
 
-<h2>YaLe: Yet another Lexer eliminator, or Yacc+Lex combined (15 KSLOC C)</h2>
+<h2 data-langs="c">YaLe: Yet another Lexer eliminator, or Yacc+Lex combined (15 KSLOC C)</h2>
 
 <p><a href="https://github.com/Aalto5G/yale">yale in Github (Aalto5G)</a>, <a
 href="https://github.com/jmtilli/yale">author's fork of yale</a></p>
@@ -417,7 +428,7 @@ callback-attributed LL(1). The callback system is particularly sophisticated.
 YaLe parses HTTP at over 3 Gbps, whereas its main competitor, BinPAC, parses
 HTTP at 0.55 Gbps. YaLe can be used for both text and binary protocols.</p>
 
-<h2>cghcpcli: carrier grade HTTP proxy client (2 KSLOC C)</h2>
+<h2 data-langs="c">cghcpcli: carrier grade HTTP proxy client (2 KSLOC C)</h2>
 
 <p><a href="https://github.com/Aalto5G/cghcpcli">cghcpcli in Github
 (Aalto5G)</a>, <a href="https://github.com/jmtilli/cghcpcli">author's fork of
@@ -426,7 +437,7 @@ cghcpcli</a></p>
 <p>Carrier grade HTTP CONNECT proxy client offers a client-side mechanism for
 NAT traversal using a HTTP CONNECT proxy in the NAT middlebox.</p>
 
-<h2>ldpairwall: L Data Plane Airwall (21 KSLOC C)</h2>
+<h2 data-langs="c">ldpairwall: L Data Plane Airwall (21 KSLOC C)</h2>
 
 <p><a href="https://github.com/Aalto5G/ldpairwall">ldpairwall in Github
 (Aalto5G)</a>, <a href="https://github.com/jmtilli/ldpairwall">author's fork of
@@ -435,7 +446,7 @@ ldpairall</a></p>
 <p>The L Data Plane Airwall offers improved NAT traversal with no security
 policy. It is a prototype of an application layer NAT technology.</p>
 
-<h2>MWRR: Money weighted rate of return calculator script (600 SLOC Python)</h2>
+<h2 data-langs="python">MWRR: Money weighted rate of return calculator script (600 SLOC Python)</h2>
 
 <p><a href="https://github.com/jmtilli/mwrr">MWRR in Github</a></p>
 
@@ -453,7 +464,7 @@ drawback of the current MWRR script is that it has hardcoded some account
 numbers that refer to my GNUCash file, so use with other people's GNUCash
 accounting does in fact require minor changes.</p>
 
-<h2>fastdiv: fast division by invariant integers using multiplication (800 SLOC C, 100 SLOC Bourne shell)</h2>
+<h2 data-langs="c shell">fastdiv: fast division by invariant integers using multiplication (800 SLOC C, 100 SLOC Bourne shell)</h2>
 
 <p><a href="https://github.com/jmtilli/fastdiv">fastdiv in Github</a></p>
 
@@ -466,7 +477,7 @@ never at all, fastdiv can improve performance. Also, modulo and div+mod
 operations are available. The code has been manually disassembled from the
 compiler output, thus explaining some of the variable names in the code.</p>
 
-<h2>nmsynproxy: Netmap SYN proxy (16 KSLOC C)</h2>
+<h2 data-langs="c">nmsynproxy: Netmap SYN proxy (16 KSLOC C)</h2>
 
 <p><a href="https://github.com/Aalto5G/nmsynproxy">nmsynproxy in Github
 (Aalto5G)</a>, <a href="https://github.com/jmtilli/nmsynproxy">author's fork of
@@ -478,7 +489,7 @@ uses is particularly modern and well thought of. The feature set exceeds that
 of the Linux SYN proxy iptables module. It is implemented entirely in user
 space unlike the iptables module.</p>
 
-<h2>PPTK: packet processing toolkit (35 KSLOC C)</h2>
+<h2 data-langs="c">PPTK: packet processing toolkit (35 KSLOC C)</h2>
 
 <p><a href="https://github.com/Aalto5G/pptk">pptk in Github (Aalto5G)</a>, <a
 href="https://github.com/jmtilli/pptk">author's fork of pptk</a></p>
@@ -488,7 +499,7 @@ space packet processing on Linux machines. It also includes L Data Plane, a
 data plane wrapper similar to OpenDataPlane but with higher netmap
 performance.</p>
 
-<h2>javaxmlfrag (4 KSLOC Java)</h2>
+<h2 data-langs="java">javaxmlfrag (4 KSLOC Java)</h2>
 
 <p><a href="https://github.com/jmtilli/javaxmlfrag">javaxmlfrag in
 Github</a>, <a href="https://jmtilli.github.io/javaxmlfragjavadoc">javaxmlfrag documentation</a></p>
@@ -506,7 +517,7 @@ approach for small structures. So for example a database dump containing
 billion objects can be parsed in an event-based manner but each object can be
 parsed into a tree.</p>
 
-<h2>javafastcomplex (6 KSLOC Java)</h2>
+<h2 data-langs="java">javafastcomplex (6 KSLOC Java)</h2>
 
 <p><a href="https://github.com/jmtilli/javafastcomplex">javafastcomplex in Github</a>, <a href="https://jmtilli.github.io/javafastcomplexjavadoc">javafastcomplex documentation</a></p>
 
@@ -518,7 +529,7 @@ immutable complex number class. Using the mutable complex number class reduces
 object creation and garbage collection overhead which allows trivially to
 improve the performance of Java code that does complex number calculations.</p>
 
-<h2>Micronova XRD (13 KSLOC Java)</h2>
+<h2 data-langs="java">Micronova XRD (13 KSLOC Java)</h2>
 
 <p><a href="https://github.com/jmtilli/micronovaxrd">micronovaxrd in
 Github</a></p>
@@ -531,7 +542,7 @@ Philips / PANalytical equipment, but current version is pure Java, uses
 optionally covariance enhanced multithreaded differential evolution for
 fitting, and supports quite many data formats.</p>
 
-<h2>Micronova XRR (14 KSLOC Java)</h2>
+<h2 data-langs="java">Micronova XRR (14 KSLOC Java)</h2>
 
 <p><a href="https://github.com/jmtilli/micronovaxrr">micronovaxrr in
 Github</a></p>
@@ -543,7 +554,7 @@ Tiilikainen for measurements from Philips / PANalytical equipment, but current
 version is pure Java, uses optionally covariance enhanced multithreaded
 differential evolution for fitting, and supports quite many data formats.</p>
 
-<h2>XRDLab (15 KSLOC Matlab/Octave)</h2>
+<h2 data-langs="octave">XRDLab (15 KSLOC Matlab/Octave)</h2>
 
 <p><a href="https://github.com/jmtilli/xrdlab">xrdlab in Github</a></p>
 
@@ -551,7 +562,7 @@ differential evolution for fitting, and supports quite many data formats.</p>
 
 <p>Overall, for new users (and for developers who don't have a problem with Java), it is recommended to use Micronova XRD instead at <a href="https://github.com/jmtilli/micronovaxrd">https://github.com/jmtilli/micronovaxrd</a>.</p>
 
-<h2>XRRLab (3 KSLOC Matlab/Octave)</h2>
+<h2 data-langs="octave">XRRLab (3 KSLOC Matlab/Octave)</h2>
 
 <p><a href="https://github.com/jmtilli/xrrlab">xrrlab in Github</a></p>
 
@@ -590,19 +601,38 @@ document.addEventListener('DOMContentLoaded', function () {
     return {header: h, nodes};
   });
 
+
   const input = document.getElementById('project-search');
-  if (input) {
-    input.addEventListener('input', function () {
+  const boxes = document.getElementsByClassName('lang');
+  function doChange() {
       // split query into separate words (tokens) and require all tokens to match
+      const langs = [];
+      for (var box of boxes)
+      {
+        if (box.checked)
+        {
+          langs.push(box.dataset.lang);
+        }
+      }
       const raw = input.value.trim().toLowerCase();
       const tokens = raw.split(/\s+/).filter(Boolean);
 
       sections.forEach(sec => {
+        const haylangs = sec.header.dataset.langs.split(" ");
         const hay = (sec.header.textContent + ' ' + sec.nodes.map(n => n.textContent).join(' ')).toLowerCase();
-        const show = tokens.length === 0 || tokens.every(tok => hay.indexOf(tok) !== -1);
+        const show = (tokens.length === 0 || tokens.every(tok => hay.indexOf(tok) !== -1)) && (langs.length === 0 || langs.every(lang => haylangs.indexOf(lang) !== -1));
         sec.header.style.display = show ? '' : 'none';
         sec.nodes.forEach(n => n.style.display = show ? '' : 'none');
       });
+  };
+  for (var box of boxes) {
+    box.addEventListener('change', function() {
+      doChange();
+    });
+  }
+  if (input) {
+    input.addEventListener('input', function () {
+      doChange();
     });
   }
 
@@ -623,7 +653,7 @@ document.addEventListener('DOMContentLoaded', function () {
       // update friendly count + percent
       const countEl = el.querySelector('.stat-count');
       if (countEl) {
-        const friendly = v >= 1000 ? (v/1000).toFixed(v%1000===0?0:1) + ' KSLOC' : v + ' SLOC';
+        const friendly = v >= 1000 ? (v/1000).toFixed(v%1000===0?0:1) + 'K' : v + '';
         countEl.innerHTML = friendly + ' <small style="color:var(--muted);font-weight:500;margin-left:6px">' + (Math.round(pct*10)/10) + '%</small>';
       }
     });
