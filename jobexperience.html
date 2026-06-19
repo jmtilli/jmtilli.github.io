@@ -123,10 +123,48 @@ img.responsive{max-width:100%;height:auto}
 .stat-item.empty .bar { display: none; }
 .stat-item.empty .stat-meta,
 .stat-item.empty .stat-count { display: none; }
+
+/* Tabs: repository / job experience (same styles as index.html) */
+.tabs {
+  display:flex;
+  gap:8px;
+  margin:0 0 12px 0;
+  align-items:center;
+}
+.tab {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 12px;
+  border-radius:8px;
+  border:1px solid #e6e9ee;
+  background:#fbfdff;
+  color:#0b2b45;
+  font-weight:700;
+  text-decoration:none;
+  cursor:pointer;
+}
+.tab:hover { transform: translateY(-1px); transition:transform 120ms ease; }
+.tab[aria-selected="true"] {
+  background: linear-gradient(90deg,var(--accent),#66a0ff);
+  color:#fff;
+  border-color: rgba(11,99,214,0.9);
+  box-shadow: 0 8px 24px rgba(11,99,214,0.12);
+}
+.tab:focus { outline:3px solid rgba(11,99,214,0.12); outline-offset:2px; border-radius:8px; }
+@media (max-width:480px) {
+  .tab { padding:8px 10px; font-size:0.95rem; }
+}
 </style>
 </head>
 <body>
 <main class="main-container">
+<!-- tabs inserted before header -->
+<nav class="tabs" role="tablist" aria-label="Site sections">
+  <a href="index.html" class="tab" role="tab" aria-selected="false">Repositories</a>
+  <a href="jobexperience.html" class="tab" role="tab" aria-selected="true">Job experience</a>
+</nav>
+
 <div class="header">
   <img src="picture2.jpg" alt="Photo of Juha-Matti Tilli" />
   <div>
