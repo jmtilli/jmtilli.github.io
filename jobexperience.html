@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>jmtilli.github.io</title>
+<style>
+:root{--max-w:1100px;--accent:#0b63d6;--muted:#58606a;}
+*{box-sizing:border-box}
+body{font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;line-height:1.5;margin:0;background:#f3f6fb;color:#101217}
+.main-container{max-width:var(--max-w);margin:28px auto;padding:26px;background:#fff;border-radius:12px;box-shadow:0 8px 30px rgba(16,22,32,0.07)}
+.header{display:flex;gap:16px;align-items:center;margin-bottom:12px}
+.header img{width:96px;height:96px;object-fit:cover;border-radius:8px;border:1px solid #e6e9ee}
+h1{font-size:1.25rem;margin:0}
+.search{margin:12px 0;display:flex;gap:8px}
+.search input{flex:1;padding:8px 10px;border:1px solid #e6e9ee;border-radius:8px;background:#fbfdff}
+.search .note{color:var(--muted);font-size:0.9rem;padding:7px 0 0 6px}
+.searchtechs{margin:12px 0;display:flex;gap:8px}
+.searchtechs input{flex:1;padding:8px 10px;border:1px solid #e6e9ee;border-radius:8px;background:#fbfdff}
+.searchtechs .note{color:var(--muted);font-size:0.9rem;padding:7px 0 0 6px}
+h2{font-size:1rem;margin:18px 0 6px 0;color:var(--accent);border-bottom:1px dashed #eef2fb;padding-bottom:6px}
+p, li {color:#26323a}
+ul {margin:8px 0 12px 24px}
+{ /* replaced with responsive grid + item styles */ }
+#techs {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 18px 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+#techs li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: linear-gradient(180deg,#ffffff,#fbfdff);
+  border: 1px solid #eef6ff;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(16,22,32,0.03);
+  color: #0b2b45;
+  font-weight: 600;
+  line-height: 1;
+  word-break: break-word;
+}
+#techs li .tech {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--accent);
+  flex: 0 0 auto;
+}
+#techs li input.tech + text,
+#techs li input.tech + span { /* fallback if you add spans later */ }
+#techs li:hover {
+  transform: translateY(-2px);
+  transition: transform 120ms ease;
+}
+/* keep spacing consistent on small screens */
+@media (max-width: 480px) {
+  #techs { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:8px; }
+  #techs li { padding: 8px; font-size: 0.95rem; }
+}
+#techs .note { display: none; }
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+img.responsive{max-width:100%;height:auto}
+@media (max-width:700px){.header{flex-direction:column;align-items:flex-start}.main-container{padding:16px}}
+
+/* --- added styles for prettier code counts --- */
+.stats {
+  margin:12px 0;
+  padding:12px;
+  background:linear-gradient(180deg,#ffffff,#fbfdff);
+  border:1px solid #e9f1ff;
+  border-radius:10px;
+}
+.stats .stats-title{font-weight:700;color:#0f2340;margin-bottom:8px}
+.stat-grid{display:flex;flex-wrap:wrap;gap:10px}
+.stat-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:8px;
+  background:#fff;
+  border-radius:8px;
+  border:1px solid #eef6ff;
+  min-width:290px;
+  flex:1 1 260px;
+}
+.stat-meta{width:110px;font-weight:700;color:var(--accent)}
+.bar{flex:1;height:10px;background:#eef6ff;border-radius:8px;overflow:hidden;box-shadow:inset 0 1px 0 rgba(255,255,255,0.6); min-width: 60px;}
+.bar > span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#66a0ff);width:0;transition:width 480ms cubic-bezier(.2,.9,.3,1)}
+.stat-count{min-width:84px;text-align:right;font-weight:600;color:#0b2b45;font-size:0.95rem}
+.stat-footnote{color:var(--muted);font-size:0.9rem;margin-top:8px}
+
+/* hide tech list by default; toggle with JS by adding/removing class 'hidden' */
+#techsdiv.hidden { display: none !important; }
+#techs.hidden { display: none !important; }
+
+/* simple button styling */
+.toggle-btn {
+  display:inline-block;
+  margin: 8px 0 12px 0;
+  padding:6px 10px;
+  border-radius:8px;
+  border:1px solid #e6e9ee;
+  background:#fbfdff;
+  color:#0b2b45;
+  cursor:pointer;
+  font-weight:600;
+}
+
+/* keep an invisible filler so the last row keeps the same column widths */
+.stat-item.empty{
+  opacity:0;
+  pointer-events:none;
+  user-select:none;
+}
+/* remove the empty block's bar and text so no visible bar appears */
+.stat-item.empty .bar { display: none; }
+.stat-item.empty .stat-meta,
+.stat-item.empty .stat-count { display: none; }
+</style>
+</head>
+<body>
+<main class="main-container">
+<div class="header">
+  <img src="picture2.jpg" alt="Photo of Juha-Matti Tilli" />
+  <div>
+    <h1>Juha‑Matti Tilli — Job experience</h1>
+    <div style="color:var(--muted);font-size:0.95rem">Descriptions of selected job experiences</div>
+  </div>
+</div>
+
+<!-- new toggle button -->
+<button id="techs-toggle" class="toggle-btn" aria-controls="techs" aria-expanded="false">Show keyword filtering</button>
+<div id="techsdiv">
+<div class="searchtechs" aria-hidden="false">
+  <input id="tech-search" type="search" placeholder="Search keywords by name or text (try: XML, JSON, Java, Python, Git)"/>
+  <div class="note">Type to filter</div>
+</div>
+<ul id="techs">
+<li data-tech="swdev"><input type="checkbox" class="tech">Software development: 10 experiences</li>
+<li data-tech="git"><input type="checkbox" class="tech">Git: 8 experiences</li>
+<li data-tech="linux"><input type="checkbox" class="tech">Linux: 8 experiences</li>
+<li data-tech="parallelprog"><input type="checkbox" class="tech">Parallel programming: 8 experiences</li>
+<li data-tech="c"><input type="checkbox" class="tech">C: 7 experiences</li>
+<li data-tech="http"><input type="checkbox" class="tech">HTTP: 6 experiences</li>
+<li data-tech="tcpip"><input type="checkbox" class="tech">TCP/IP: 6 experiences</li>
+<li data-tech="highperf"><input type="checkbox" class="tech">High performance: 5 experiences</li>
+<li data-tech="json"><input type="checkbox" class="tech">JSON: 5 experiences</li>
+<li data-tech="linuxkernel"><input type="checkbox" class="tech">Linux kernel: 5 experiences</li>
+<li data-tech="wireshark"><input type="checkbox" class="tech">Wireshark: 5 experiences</li>
+<li data-tech="firewalls"><input type="checkbox" class="tech">Firewalls: 4 experiences</li>
+<li data-tech="latex"><input type="checkbox" class="tech">LaTeX: 4 experiences</li>
+<li data-tech="nat"><input type="checkbox" class="tech">NAT: 4 experiences</li>
+<li data-tech="netsec"><input type="checkbox" class="tech">Network security: 4 experiences</li>
+<li data-tech="serverhw"><input type="checkbox" class="tech">Server hardware: 4 experiences</li>
+<li data-tech="tls"><input type="checkbox" class="tech">TLS/SSL: 4 experiences</li>
+<li data-tech="arm"><input type="checkbox" class="tech">ARM: 3 experiences</li>
+<li data-tech="cryptography"><input type="checkbox" class="tech">Cryptography: 3 experiences</li>
+<li data-tech="distributed"><input type="checkbox" class="tech">Distributed systems: 3 experiences</li>
+<li data-tech="embedded"><input type="checkbox" class="tech">Embedded systems: 3 experiences</li>
+<li data-tech="ha"><input type="checkbox" class="tech">High availability: 3 experiences</li>
+<li data-tech="highperfpp"><input type="checkbox" class="tech">High performance packet processing: 3 experiences</li>
+<li data-tech="ipv6"><input type="checkbox" class="tech">IPv6: 3 experiences</li>
+<li data-tech="java"><input type="checkbox" class="tech">Java: 3 experiences</li>
+<li data-tech="javascript"><input type="checkbox" class="tech">JavaScript: 3 experiences</li>
+<li data-tech="pthreads"><input type="checkbox" class="tech">pthreads: 3 experiences</li>
+<li data-tech="python"><input type="checkbox" class="tech">Python: 3 experiences</li>
+<li data-tech="scapy"><input type="checkbox" class="tech">Scapy: 3 experiences</li>
+<li data-tech="sqa"><input type="checkbox" class="tech">Software quality assurance: 3 experiences</li>
+<li data-tech="amazonaws"><input type="checkbox" class="tech">Amazon AWS: 2 experiences</li>
+<li data-tech="apache"><input type="checkbox" class="tech">Apache: 2 experiences</li>
+<li data-tech="cellular"><input type="checkbox" class="tech">Cellular communications: 2 experiences</li>
+<li data-tech="characterization"><input type="checkbox" class="tech">Characterization: 2 experiences</li>
+<li data-tech="cpp"><input type="checkbox" class="tech">C++: 2 experiences</li>
+<li data-tech="cvs"><input type="checkbox" class="tech">CVS: 2 experiences</li>
+<li data-tech="de"><input type="checkbox" class="tech">Differential evolution: 2 experiences</li>
+<li data-tech="dns"><input type="checkbox" class="tech">DNS: 2 experiences</li>
+<li data-tech="doxygen"><input type="checkbox" class="tech">Doxygen: 2 experiences</li>
+<li data-tech="dpdk"><input type="checkbox" class="tech">DPDK: 2 experiences</li>
+<li data-tech="dpi"><input type="checkbox" class="tech">Deep packet inspection: 2 experiences</li>
+<li data-tech="ga"><input type="checkbox" class="tech">Genetic algorithms: 2 experiences</li>
+<li data-tech="geojson"><input type="checkbox" class="tech">GeoJSON: 2 experiences</li>
+<li data-tech="hrxrd"><input type="checkbox" class="tech">HRXRD: 2 experiences</li>
+<li data-tech="i2c"><input type="checkbox" class="tech">I2C: 2 experiences</li>
+<li data-tech="iptables"><input type="checkbox" class="tech">iptables: 2 experiences</li>
+<li data-tech="jfreechart"><input type="checkbox" class="tech">JFreeChart: 2 experiences</li>
+<li data-tech="jquery"><input type="checkbox" class="tech">jQuery: 2 experiences</li>
+<li data-tech="kvm"><input type="checkbox" class="tech">KVM: 2 experiences</li>
+<li data-tech="matlab"><input type="checkbox" class="tech">Matlab: 2 experiences</li>
+<li data-tech="movpe"><input type="checkbox" class="tech">MOVPE: 2 experiences</li>
+<li data-tech="netmap"><input type="checkbox" class="tech">netmap: 2 experiences</li>
+<li data-tech="nodejs"><input type="checkbox" class="tech">NodeJS: 2 experiences</li>
+<li data-tech="octave"><input type="checkbox" class="tech">Octave: 2 experiences</li>
+<li data-tech="parsing"><input type="checkbox" class="tech">Parsing: 2 experiences</li>
+<li data-tech="postgresql"><input type="checkbox" class="tech">PostgreSQL: 2 experiences</li>
+<li data-tech="protobuf"><input type="checkbox" class="tech">Protocol buffers: 2 experiences</li>
+<li data-tech="securecoding"><input type="checkbox" class="tech">Secure coding: 2 experiences</li>
+<li data-tech="sql"><input type="checkbox" class="tech">SQL: 2 experiences</li>
+<li data-tech="swing"><input type="checkbox" class="tech">Swing: 2 experiences</li>
+<li data-tech="thinfilms"><input type="checkbox" class="tech">Thin films: 2 experiences</li>
+<li data-tech="xml"><input type="checkbox" class="tech">XML: 2 experiences</li>
+<li data-tech="xrr"><input type="checkbox" class="tech">XRR: 2 experiences</li>
+<li data-tech="5g"><input type="checkbox" class="tech">5G: 1 experiences</li>
+<li data-tech="ald"><input type="checkbox" class="tech">ALD: 1 experiences</li>
+<li data-tech="amazons3"><input type="checkbox" class="tech">Amazon S3: 1 experiences</li>
+<li data-tech="bash"><input type="checkbox" class="tech">bash: 1 experiences</li>
+<li data-tech="bind"><input type="checkbox" class="tech">BIND: 1 experiences</li>
+<li data-tech="bugzilla"><input type="checkbox" class="tech">Bugzilla: 1 experiences</li>
+<li data-tech="containers"><input type="checkbox" class="tech">Containers: 1 experiences</li>
+<li data-tech="dfanfa"><input type="checkbox" class="tech">DFA/NFA: 1 experiences</li>
+<li data-tech="eclipse"><input type="checkbox" class="tech">Eclipse: 1 experiences</li>
+<li data-tech="elasticsearch"><input type="checkbox" class="tech">ElasticSearch: 1 experiences</li>
+<li data-tech="elhwdesign"><input type="checkbox" class="tech">Electronics hardware design: 1 experiences</li>
+<li data-tech="evasions"><input type="checkbox" class="tech">Evasions: 1 experiences</li>
+<li data-tech="freebsd"><input type="checkbox" class="tech">FreeBSD: 1 experiences</li>
+<li data-tech="freemarker"><input type="checkbox" class="tech">FreeMarker: 1 experiences</li>
+<li data-tech="gerrit"><input type="checkbox" class="tech">Gerrit: 1 experiences</li>
+<li data-tech="gnss"><input type="checkbox" class="tech">GNSS: 1 experiences</li>
+<li data-tech="googlemaps"><input type="checkbox" class="tech">Google Maps: 1 experiences</li>
+<li data-tech="gre"><input type="checkbox" class="tech">GRE: 1 experiences</li>
+<li data-tech="gtp"><input type="checkbox" class="tech">GTP: 1 experiences</li>
+<li data-tech="html"><input type="checkbox" class="tech">HTML: 1 experiences</li>
+<li data-tech="http2"><input type="checkbox" class="tech">HTTP/2: 1 experiences</li>
+<li data-tech="ipsec"><input type="checkbox" class="tech">IPSec: 1 experiences</li>
+<li data-tech="jdbc"><input type="checkbox" class="tech">JDBC: 1 experiences</li>
+<li data-tech="junit"><input type="checkbox" class="tech">jUnit: 1 experiences</li>
+<li data-tech="libcurl"><input type="checkbox" class="tech">libcurl: 1 experiences</li>
+<li data-tech="liion"><input type="checkbox" class="tech">Lithium-ion batteries: 1 experiences</li>
+<li data-tech="littlekernel"><input type="checkbox" class="tech">Little kernel: 1 experiences</li>
+<li data-tech="lucene"><input type="checkbox" class="tech">Lucene: 1 experiences</li>
+<li data-tech="mips"><input type="checkbox" class="tech">MIPS: 1 experiences</li>
+<li data-tech="mysql"><input type="checkbox" class="tech">MySQL: 1 experiences</li>
+<li data-tech="nandflash"><input type="checkbox" class="tech">NAND flash: 1 experiences</li>
+<li data-tech="nfs"><input type="checkbox" class="tech">NFS: 1 experiences</li>
+<li data-tech="nginx"><input type="checkbox" class="tech">nginx: 1 experiences</li>
+<li data-tech="ntp"><input type="checkbox" class="tech">NTP: 1 experiences</li>
+<li data-tech="opendataplane"><input type="checkbox" class="tech">OpenDataPlane: 1 experiences</li>
+<li data-tech="ospf"><input type="checkbox" class="tech">OSPF: 1 experiences</li>
+<li data-tech="pr"><input type="checkbox" class="tech">Photoreflectance: 1 experiences</li>
+<li data-tech="rcs"><input type="checkbox" class="tech">RCS: 1 experiences</li>
+<li data-tech="regexp"><input type="checkbox" class="tech">regexp: 1 experiences</li>
+<li data-tech="scrum"><input type="checkbox" class="tech">Scrum: 1 experiences</li>
+<li data-tech="se"><input type="checkbox" class="tech">Spectroscopic ellipsometry: 1 experiences</li>
+<li data-tech="smb"><input type="checkbox" class="tech">SMB: 1 experiences</li>
+<li data-tech="subversion"><input type="checkbox" class="tech">Subversion: 1 experiences</li>
+<li data-tech="tomcat"><input type="checkbox" class="tech">Tomcat: 1 experiences</li>
+<li data-tech="uboot"><input type="checkbox" class="tech">U-Boot: 1 experiences</li>
+<li data-tech="unix"><input type="checkbox" class="tech">Unix: 1 experiences</li>
+<li data-tech="vpn"><input type="checkbox" class="tech">VPN: 1 experiences</li>
+<li data-tech="web20"><input type="checkbox" class="tech">Web 2.0: 1 experiences</li>
+<li data-tech="zfs"><input type="checkbox" class="tech">ZFS: 1 experiences</li>
+</ul>
+</div>
+
+<div class="search" aria-hidden="false">
+  <input id="project-search" type="search" placeholder="Search employment by name or text (try: XML, JSON, Java, Python, QUIC)"/>
+  <div class="note">Type to filter</div>
+</div>
+
+<h2 data-techs="arm c cryptography embedded git gre ha iptables ipv6 json linux nandflash python tcpip uboot gnss nodejs i2c elhwdesign linuxkernel ipsec containers tls swdev parallelprog cellular liion elasticsearch kvm ntp securecoding wireshark geojson netsec ospf serverhw vpn nat firewalls dns javascript">
+Winter 2023/4 - (current): Senior Software Developer at Goodmill Systems: 2.5+ years
+</h2>
+
+<p>I developed software used in reliable routers with multiple redundant uplinks, used for critical network connectivity in vehicles, mostly in public sector, defense and law enforcement use cases, and locations like pharmacies where always-on connectivity is needed. I was the sole author of Goodmill Traffic Duplication (GTD-4) tunnel, which duplicates downlink and uplink traffic to as many as 4 (or whatever the C code #defines) links, always picking the first copy of arrived packet, with duplicates removed, with secure quantum safe cryptographic registration and also optional user plane packet encryption, with cryptographical details far stronger than in most IPsec deployments for example. GTD-4 client performs surprisingly well in user space, even in low powered ARM processors, and GTD-4 server performance is usually bounded by the willingness to pay high-bandwidth Internet connection costs. This unique feature cannot be matched by competitors, and gives lowest latency and highest bandwidth of the multiple links to the user, with enhanced availability and no switchover latency. The implementation is extremely portable, and I trust it can be compiled still 20 years from now with practically no changes. Later I added link bonding in a way that actually works with a single TCP connection, and it performed extremely well too, actually obtaining the bandwidth sum of the individual sub-links as the bandwidth. I also designed the implementation idea of a battery powered briefcase router, used in temporary locations, with power from AC, 12V DC, solar panel or built-in lithium battery. I also worked with GPS/GNSS-based PPS NTP clock synchronization, QoS features with Linux tc command and iptables based firewalling. The IPv6 support of Goodmill products is almost entirely written by me. Thanks to this job, I have extensive knowledge about NAND flash, UBI and u-boot of Linux kernel in embedded environments.</p>
+
+<p><b>Keywords:</b> ARM, C, Cellular communications, Containers, Cryptography, DNS, Elasticsearch, Electronics hardware design, Embedded systems, Firewalls, GeoJSON, Git, GNSS, GRE, High availability, I2C, IPsec, iptables, IPv6, JavaScript, JSON, KVM, Linux, Linux kernel, Lithium ion batteries, NAND Flash, NAT, Network security, NodeJS, NTP, OSPF, Parallel programming, Python, Secure coding, Server hardware, Software development, TCP/IP, TLS/SSL, U-boot, VPN, Wireshark</p>
+
+<h2 data-techs="c cpp git iptables json libcurl linux parallelprog tcpip embedded linuxkernel tls swdev arm wireshark mips netsec nat http firewalls">
+Spring 2023-Winter 2023/4: Software Developer at F-Secure: &lt;1 year
+</h2>
+
+<p>I developed F-Secure's consumer network security routers. Initially I joined F-Secure since the idea of network security interested me, but it gradually turned out that what was advertised as protection for devices that lack software-based endpoint protection (F-Secure SENSE), like smart TVs, actually was content control where parents set rules for different devices, and the router blocks certain content based on DNS names, even if TLS is being used. I feel this is a double-edged sword. On one hand, there probably are families with children of different ages, where such content rules could be applied to the very youngest of them (since prohibiting Internet access may not be doable if the oldest children have Internet access and the youngest start demanding Internet access too), but I feel it is probably misused in many cases, with parents setting very strict rules for anyone who is less than 18 years of age. I did my job, and could have done far more if the product management had given go-ahead for QUIC support for example (which would have been trivial for me to implement), but wasn't particularly happy in my job, since what I thought was consumer network security was actually content control.</p>
+
+<p><b>Keywords:</b> ARM, C, C++, Embedded systems, Firewalls, Git, HTTP, iptables, JSON, libcurl, Linux, Linux kernel, MIPS, NAT, Network security, Parallel programming, Software development, TCP/IP, TLS/SSL, Wireshark</p>
+
+<h2 data-techs="bash c cpp cvs geojson git highperf linux nfs nodejs python rcs json mysql parsing linuxkernel swdev apache parallelprog javascript ha jquery nginx protobuf amazonaws xml serverhw http sql postgresql">
+Winter 2018/9-Spring 2023: Software Developer at Foreca: 4.5 years
+</h2>
+
+<p>I developed weather service software. Some of my innovative ideas and implementations include for example a custom C++ database (a custom on-disk format) for weather model verification, which far outperformed and outclassed in usefulness an existing Hadoop/Java based monstrosity that was so overloaded deleting old data couldn't have worked, a bytecode based GeoJSON generator for identifying areas of interesting weather based on Boolean expressions, a raster weather data map service with very fast interpolation based visually appealing zooming to arbitrary zoom levels, that allows palettes written in a custom expression language automatically compiled to x86-64 machine code, and correct GeoJSON isobands generation with marching squares that an existing senior developer thought could be implemented by modifying an old ad-hoc algorithm instead of developing marching squares from the scratch, but which he couldn't make work in a way that passed GeoJSON verification whereas my implementation worked after few minor bugfixes. Weather service operation requires moving and processing lots of data fast, and my experience from Nokia writing fast packet processing software proved very valuable.</p>
+
+<p><b>Keywords:</b> Amazon AWS, Apache, bash, C, C++, CVS, GeoJSON, Git, JavaScript, jQuery, JSON, High availability, High performance, HTTP, Linux, Linux kernel, NFS, nginx, MySQL, NodeJS, Parallel programming, Parsing, PostgreSQL, Protocol buffers, Python, RCS, Server hardware, Software development, SQL, XML</p>
+
+<h2 data-techs="c dfanfa git highperf highperfpp http linux nat netmap parallelprog parsing pthreads regexp scapy tcpip tls ipv6 swdev sqa python latex wireshark dpdk netsec firewalls dpi">
+Spring 2018-Winter 2019/20: Doctoral Student at Aalto University: part-time, &approx;1 year full-time equivalent
+</h2>
+
+<p>
+I developed network security tools such as pptk, nmsynproxy, ldpairwall, cghcpcli and yale. I also advised in the MSc thesis of Maria Riaz and developed build tools (stirmake and its bytecode engine abce). My licentiate thesis is about AL-NAT, a unique form of NAT traversal technology that ldpairwall offers, which detects the accessed endpoint device from TCP data stream, extracting the DNS name (plaintext HTTP, TLS). Later I found F-Secure SENSE used the same technology in the other direction, to block HTTP/TLS access to certain DNS names. YaLe is unmatched as a network protocol parser generator by anything open source, far exceeding the performance and correctness of Binpac for example. Stirmake is like make, except it works for projects that consist of multiple directories. If you feel make works for multi-directory projects, you haven't read "Recursive Make Considered Harmful" by Peter Miller. If you think you can make a non-recursive modular build system with make easily, you haven't tried Stirmake or else your build system is very trivial and suffers from many hazardous design choices. The packet processing toolkit pptk contains open-source implementations for some of the inventive user space packet processing ideas I invented at Nokia and got publication permission from them. All of the code I implemented at Aalto University is MIT licensed. With nmsynproxy as a component, I and Jesus Llorente won 25 000 EUR from SoftFIRE security stream in 2018. I also discovered SegmentSmack and FragmentSmack vulnerabilities in Windows and Linux, and was awarded 15000 USD by Microsoft for responsible disclosure.
+</p>
+<p>
+Ultimately I decided to focus on a career in the private sector due to better salary than in a university, and semi-permanently halt my studies at the Licentiate level. Later my professor was unfortunately murdered, so I no longer have a supervising professor.
+</p>
+
+<p><b>Keywords:</b> C, Deep packet inspection, DFA/NFA, DPDK, Firewalls, Git, High performance, High performance packet processing, HTTP, IPv6, LaTeX, Linux, NAT, netmap, Network security, Parallel
+programming, parsing, pthreads, Python, regexp, Scapy, Software development, Software quality assurance, TCP/IP, TLS/SSL, Wireshark</p>
+
+<h2 data-techs="c cellular doxygen dpdk git gtp highperf highperfpp http http2 json linux netmap opendataplane parallelprog protobuf pthreads scapy subversion tcpip tls ipv6 5g sqa swdev latex cryptography kvm wireshark serverhw">
+Winter 2014/5-Winter 2018/9: Research specialist / SW developer at Nokia Bell Labs: 3.5 years
+</h2>
+
+<p>
+I worked on a research project involving mobile network emulation on Linux computers. Four patent applications, but two patent applications were abandoned, possibly since they were meant for standards, and the 5G standards didn't end up incorporating them. I also authored a huge number of non-patented inventions, for many of which I got publication permissions. The inventions include new ways of allocating memory and passing packets in producer-consumer and producer-worker-consumer architectures, a new patented packet processing architecture using a producer-worker-consumer approach with user and control plane, and optimization of link associations with simulated annealing, using a unique optimization I invented that improves the performance about thousandfold, making the single-threaded simulated annealing exceed in performance genetic/evolutionary algorithms for example. The 5G core network user plane of the project where I worked was nearly entirely written by me until the point I left, and the non-core network was written by others following my inventions and code structure, until I took responsibility of some of that code as well. Ultimately I left for Foreca, since I was somewhat unsatisfied by the non-willingness of Nokia to let me work part-time at Aalto University advancing my licentiate/doctoral studies, and was told by my manager that a pay raise for me was in planning but could have been announced only a bit later when the final decision would have been made. However, what probably wasn't in planning would be permission for a continued part-time job at Aalto University, so I'm still happy about the decision to leave to Foreca, since they didn't find my licentiate/doctoral studies so alarming.
+</p>
+
+<p><b>Keywords:</b> 5G, C, Cellular communications, Cryptography, Doxygen, DPDK, Git, GTP, High
+performance, High performance packet processing, HTTP, HTTP/2, IPv6, JSON, KVM, LaTeX, Linux, netmap, OpenDataPlane, Parallel programming,
+Protocol Buffers, pthreads, Scapy, Server hardware, Software development, Software quality assurance, Subversion, TCP/IP, TLS/SSL, Wireshark</p>
+
+<h2 data-techs="arm c distributed embedded gerrit git highperf i2c linux linuxkernel littlekernel parallelprog swdev">
+Fall 2014: System software engineer at NVIDIA Helsinki: 4 months
+</h2>
+
+<p>
+I wrote Linux kernel space drivers and an embedded Little Kernel based power management firmware for NVIDIA's Tegra mobile SoCs. I found in the few months at NVIDIA that I'm a userspace guy, not a kernel guy. While I can write kernel code (whether it's the Linux kernel or some other embedded kernel like the Little Kernel), the very restricted environment makes software development somewhat dull, since what you can do based on the stack depth for example makes many approaches infeasible. I found some design choices at NVIDIA bad, without expressing my concerns against my employer, and later a MSc thesis done at NVIDIA I found showed they suffered from the design choices they made, which they wouldn't have suffered if their approach would have been similar to other SoC vendors, like Qualcomm for example. My future successful career at Nokia, Aalto University and Goodmill Systems was about user space packet processing.
+</p>
+
+
+<p><b>Keywords:</b>
+ARM, C, Distributed systems, Embedded systems, Gerrit, Git, High performance,
+I2C, Linux, Linux kernel, Little kernel, Parallel programming, Software development
+</p>
+
+<h2 data-techs="characterization de ga hrxrd java jfreechart latex matlab movpe octave pr swdev swing thinfilms xrr">
+Summers 2013, 2014: Research assistant at Aalto University: 5 months
+</h2>
+
+<p>
+I researched methods to measure quaternary semiconductor composition and strain state using an X-ray diffractometer. My final method works extremely well, and can determine the composition of a quaternary layer with two free variables solely using an X-ray diffractometer. This is something that could have been patented if the patent application was filed before I published my MSc thesis. The MSc thesis naturally has the best grade 5/5. In the few months, I wrote so much material about X-ray data analysis that it could have been a good basis for a PhD thesis, but I finally realized that I want to pursue some other career than X-ray data analysis, because there are probably only a handful of X-ray diffractometers in Finland.
+</p>
+
+<p><b>Keywords:</b>
+Characterization, Differential evolution, Genetic algorithms, HRXRD, Java, JFreeChart, LaTeX, Matlab, MOVPE, Octave, Photoreflectance, Software development, Swing, Thin films, XRR
+</p>
+
+<h2 data-techs="bugzilla c dpi distributed doxygen evasions firewalls git ha highperf highperfpp http linux linuxkernel netsec parallelprog pthreads scapy scrum smb tcpip swdev sqa wireshark securecoding nat">
+Fall 2010-Fall 2012: Software specialist at Stonesoft: 2 years
+</h2>
+<p>
+I developed the Stonesoft Firewall and its deep packet inspection technology. I was a proponent of secure programming practices, and heavily developed testing of deep packet inspection, creating a Python based test system that others subsequently used to implement and test support for new protocols. The protocol-independent file deep inspection feature was nearly entirely written by me, as was the anomaly detection for deep packet inspection to be able to detect some of the advanced evasion techniques that Stonesoft had discovered.
+</p>
+
+<p><b>Keywords:</b>
+Bugzilla, C, Deep packet inspection, Distributed systems, Doxygen,
+Evasions, Firewalls, Git, High Availability, High performance, High performance packet processing, HTTP,
+Linux, Linux kernel, NAT, Network security, parallel
+programming, pthreads, Scapy, Scrum, Secure coding, SMB, Software development, Software quality assurance, TCP/IP, Wireshark
+</p>
+
+<h2 data-techs="amazonaws amazons3 apache bind cryptography cvs eclipse freebsd freemarker git googlemaps html http java javascript jdbc jquery json junit lucene parallelprog postgresql serverhw tcpip tomcat unix web20 xml zfs linux distributed swdev dns sql">
+Winter 2008-Fall 2010: Software Developer at Equal Dreams: 3 years, &approx;1.5 years full-time equivalent
+</h2>
+
+<p> I developed a new online music marketplace and I expanded the service to
+include a music catalog similar in size to the largest online music shops. I
+was known as a developer who diagnosed and fixed bugs very quickly. Later I
+left the startup company, since I estimated that it won't succeed.
+Unfortunately, due to competition from streaming-based payment model
+implemented by Spotify for example, it didn't succeed.</p>
+
+<p><b>Keywords:</b>
+Amazon AWS, Amazon S3, Apache, BIND, Cryptography, CVS, Distributed systems, DNS, Eclipse, FreeBSD, FreeMarker, Git,
+Google Maps, HTML, HTTP, Java, JavaScript, JDBC, jQuery,
+JSON, JUnit, Linux, Lucene, Parallel programming, PostgreSQL, Server hardware, Software development, SQL,
+TCP/IP, Tomcat, Unix, Web 2.0, XML, ZFS
+</p>
+
+<h2 data-techs="ald characterization de ga hrxrd java jfreechart latex matlab movpe octave swdev se swing thinfilms xrr">
+Summers 2006, 2007: Research Assistant at Aalto University: 7 months
+</h2>
+
+<p>
+In 2006 I implemented software for X-ray reflectivity analysis of thin film structures. This was my first job, and my existing software development experience helped me implement the software with user interface better than in commercial variants under the direction of Jouni Tiilikainen doing his doctoral studies. I immediately realized that I have the capability to do my own doctoral studies, and decided this is the career I will focus on, later changing my decision.
+</p>
+
+<p>
+In 2007 I implemented software for X-ray diffraction analysis of semiconductor heterostructures and wrote a BSc thesis about that. In my opinion, this was an extremely capable achievement, since I wasn't given any instructions about how X-ray diffraction curves are calculated, so I had to learn the theory without any background studies from the scratch, reading scientific papers in a foreign field. I think I got the details right, and everything is in my BSc thesis, apart from the derivation of Takagi-Taupin equations from Maxwell equations. My software still had a user interface better than commercial variants, extending it to X-ray diffraction from X-ray reflectivity, and gives accurate results, this time with pure Java based implementation which was more performing than the old Matlab approach of Jouni Tiilikainen. Ultimately I realized that this field is probably not the ideal choice for a career, and decided to focus on a career in the private sector.
+</p>
+
+<p><b>Keywords:</b>
+ALD, Characterization, Differential evolution, Genetic algorithms, HRXRD, Java, JFreeChart, LaTeX, Matlab, MOVPE, Octave, Software development, Spectroscopic ellipsometry, Swing, Thin fims, XRR
+</p>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // build an index of top-level sections: every H2 plus following siblings until next H1/H2
+  const headers = Array.from(document.querySelectorAll('h2'));
+  const sections = headers.map(h => {
+    const nodes = [];
+    let n = h.nextElementSibling;
+    while (n && n.tagName !== 'H1' && n.tagName !== 'H2') {
+      nodes.push(n);
+      n = n.nextElementSibling;
+    }
+    return {header: h, nodes};
+  });
+
+
+  const input = document.getElementById('project-search');
+  const input2 = document.getElementById('tech-search');
+  const boxes = document.getElementsByClassName('tech');
+  function doChange() {
+      // split query into separate words (tokens) and require all tokens to match
+      const techs = [];
+      for (var box of boxes)
+      {
+        if (box.checked)
+        {
+          techs.push(box.parentNode.dataset.tech);
+        }
+      }
+      const raw = input.value.trim().toLowerCase();
+      const tokens = raw.split(/\s+/).filter(Boolean);
+
+      sections.forEach(sec => {
+        const haytechs = sec.header.dataset.techs.split(" ");
+        const hay = (sec.header.textContent + ' ' + sec.nodes.map(n => n.textContent).join(' ')).toLowerCase();
+        const show = (tokens.length === 0 || tokens.every(tok => hay.indexOf(tok) !== -1)) && (techs.length === 0 || techs.every(tech => haytechs.indexOf(tech) !== -1));
+        sec.header.style.display = show ? '' : 'none';
+        sec.nodes.forEach(n => n.style.display = show ? '' : 'none');
+      });
+  };
+  for (var box of boxes) {
+    box.addEventListener('change', function() {
+      doChange();
+    });
+  }
+  if (input) {
+    input.addEventListener('input', function () {
+      doChange();
+    });
+  }
+  if (input2) {
+    input2.addEventListener('input', function () {
+      const raw = input2.value.trim().toLowerCase();
+      const tokens = raw.split(/\s+/).filter(Boolean);
+      const techsul = document.getElementById('techs');
+      for (var child of techsul.children) {
+        const hay = child.textContent.toLowerCase();
+	const show = (tokens.length === 0 || tokens.every(tok => hay.indexOf(tok) !== -1));
+	child.style.display = show ? '' : 'none';
+      }
+    });
+  }
+
+  // techs toggle behavior
+  const toggleBtn = document.getElementById('techs-toggle');
+  const techsList = document.getElementById('techsdiv');
+  if (toggleBtn && techsList) {
+    // start hidden
+    techsList.classList.add('hidden');
+    toggleBtn.addEventListener('click', function () {
+      const hidden = techsList.classList.toggle('hidden');
+      toggleBtn.textContent = hidden ? 'Show keyword filtering' : 'Hide keyword filtering';
+      toggleBtn.setAttribute('aria-expanded', (!hidden).toString());
+    });
+  }
+
+  // --- render the stats bars for code counts ---
+  // ignore the invisible filler (has class "empty")
+  const statItems = Array.from(document.querySelectorAll('.stat-item')).filter(el => !el.classList.contains('empty'));
+  if (statItems.length) {
+    const vals = statItems.map(el => Number(el.dataset.sloc || 0));
+    const total = vals.reduce((s,v)=>s+v,0) || 1;
+
+    statItems.forEach((el, idx) => {
+      const v = vals[idx];
+      const pct = (v / total) * 100;
+      const span = el.querySelector('.bar > span');
+      // animate bar width
+      if (span) requestAnimationFrame(() => { span.style.width = pct + '%'; });
+
+      // update friendly count + percent
+      const countEl = el.querySelector('.stat-count');
+      if (countEl) {
+        const friendly = v >= 1000 ? (v/1000).toFixed(v%1000===0?0:1) + 'K' : v + '';
+        countEl.innerHTML = friendly + ' <small style="color:var(--muted);font-weight:500;margin-left:6px">' + (Math.round(pct*10)/10) + '%</small>';
+      }
+    });
+
+    // insert total display above footnote
+    const totalDisplay = total >= 1000 ? (total/1000).toFixed(total%1000===0?0:1)+' KSLOC' : total+' SLOC';
+    const foot = document.querySelector('.stat-footnote');
+    if (foot) {
+      const node = document.createElement('div');
+      node.style.fontWeight = '700';
+      node.style.marginTop = '6px';
+      node.textContent = 'Total: ' + totalDisplay;
+      foot.parentNode.insertBefore(node, foot);
+    }
+  }
+});
+</script>
+</main>
+</body>
+</html>
