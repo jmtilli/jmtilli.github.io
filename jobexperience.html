@@ -186,7 +186,7 @@ img.responsive{max-width:100%;height:auto}
 <li data-tech="linux"><input type="checkbox" class="tech">Linux: 8 experiences</li>
 <li data-tech="parallelprog"><input type="checkbox" class="tech">Parallel programming: 8 experiences</li>
 <li data-tech="c"><input type="checkbox" class="tech">C: 7 experiences</li>
-<li data-tech="http"><input type="checkbox" class="tech">HTTP: 6 experiences</li>
+<li data-tech="http"><input type="checkbox" class="tech">HTTP: 7 experiences</li>
 <li data-tech="tcpip"><input type="checkbox" class="tech">TCP/IP: 6 experiences</li>
 <li data-tech="highperf"><input type="checkbox" class="tech">High performance: 5 experiences</li>
 <li data-tech="json"><input type="checkbox" class="tech">JSON: 5 experiences</li>
@@ -197,6 +197,7 @@ img.responsive{max-width:100%;height:auto}
 <li data-tech="nat"><input type="checkbox" class="tech">NAT: 4 experiences</li>
 <li data-tech="netsec"><input type="checkbox" class="tech">Network security: 4 experiences</li>
 <li data-tech="serverhw"><input type="checkbox" class="tech">Server hardware: 4 experiences</li>
+<li data-tech="sqa"><input type="checkbox" class="tech">Software quality assurance: 4 experiences</li>
 <li data-tech="tls"><input type="checkbox" class="tech">TLS/SSL: 4 experiences</li>
 <li data-tech="arm"><input type="checkbox" class="tech">ARM: 3 experiences</li>
 <li data-tech="cryptography"><input type="checkbox" class="tech">Cryptography: 3 experiences</li>
@@ -210,7 +211,6 @@ img.responsive{max-width:100%;height:auto}
 <li data-tech="pthreads"><input type="checkbox" class="tech">pthreads: 3 experiences</li>
 <li data-tech="python"><input type="checkbox" class="tech">Python: 3 experiences</li>
 <li data-tech="scapy"><input type="checkbox" class="tech">Scapy: 3 experiences</li>
-<li data-tech="sqa"><input type="checkbox" class="tech">Software quality assurance: 3 experiences</li>
 <li data-tech="amazonaws"><input type="checkbox" class="tech">Amazon AWS: 2 experiences</li>
 <li data-tech="apache"><input type="checkbox" class="tech">Apache: 2 experiences</li>
 <li data-tech="cellular"><input type="checkbox" class="tech">Cellular communications: 2 experiences</li>
@@ -301,13 +301,13 @@ img.responsive{max-width:100%;height:auto}
   <div class="note">Type to filter</div>
 </div>
 
-<h2 data-techs="arm c cryptography embedded git gre ha iptables ipv6 json linux nandflash python tcpip uboot gnss nodejs i2c elhwdesign linuxkernel ipsec containers tls swdev parallelprog cellular liion elasticsearch kvm ntp securecoding wireshark geojson netsec ospf serverhw vpn nat firewalls dns javascript">
+<h2 data-techs="arm c cryptography embedded git gre ha iptables ipv6 json linux nandflash python tcpip uboot gnss nodejs i2c elhwdesign linuxkernel ipsec containers tls swdev parallelprog cellular liion elasticsearch kvm ntp securecoding wireshark geojson netsec ospf serverhw vpn nat firewalls dns javascript sqa http">
 Winter 2023/4 - (current): Senior Software Developer at Goodmill Systems: 2.5+ years
 </h2>
 
 <p>I developed software used in reliable routers with multiple redundant uplinks, used for critical network connectivity in vehicles, mostly in public sector, defense and law enforcement use cases, and locations like pharmacies where always-on connectivity is needed. I was the sole author of Goodmill Traffic Duplication (GTD-4) tunnel, which duplicates downlink and uplink traffic to as many as 4 (or whatever the C code #defines) links, always picking the first copy of arrived packet, with duplicates removed, with secure quantum safe cryptographic registration and also optional user plane packet encryption, with cryptographical details far stronger than in most IPsec deployments for example. GTD-4 client performs surprisingly well in user space, even in low powered ARM processors, and GTD-4 server performance is usually bounded by the willingness to pay high-bandwidth Internet connection costs. This unique feature cannot be matched by competitors, and gives lowest latency and highest bandwidth of the multiple links to the user, with enhanced availability and no switchover latency. The implementation is extremely portable, and I trust it can be compiled still 20 years from now with practically no changes. Later I added link bonding in a way that actually works with a single TCP connection, and it performed extremely well too, actually obtaining the bandwidth sum of the individual sub-links as the bandwidth. I also designed the implementation idea of a battery powered briefcase router, used in temporary locations, with power from AC, 12V DC, solar panel or built-in lithium battery. I also worked with GPS/GNSS-based PPS NTP clock synchronization, QoS features with Linux tc command and iptables based firewalling. The IPv6 support of Goodmill products is almost entirely written by me. Thanks to this job, I have extensive knowledge about NAND flash, UBI and u-boot of Linux kernel in embedded environments.</p>
 
-<p><b>Keywords:</b> ARM, C, Cellular communications, Containers, Cryptography, DNS, Elasticsearch, Electronics hardware design, Embedded systems, Firewalls, GeoJSON, Git, GNSS, GRE, High availability, I2C, IPsec, iptables, IPv6, JavaScript, JSON, KVM, Linux, Linux kernel, Lithium ion batteries, NAND Flash, NAT, Network security, NodeJS, NTP, OSPF, Parallel programming, Python, Secure coding, Server hardware, Software development, TCP/IP, TLS/SSL, U-boot, VPN, Wireshark</p>
+<p><b>Keywords:</b> ARM, C, Cellular communications, Containers, Cryptography, DNS, Elasticsearch, Electronics hardware design, Embedded systems, Firewalls, GeoJSON, Git, GNSS, GRE, High availability, HTTP, I2C, IPsec, iptables, IPv6, JavaScript, JSON, KVM, Linux, Linux kernel, Lithium ion batteries, NAND Flash, NAT, Network security, NodeJS, NTP, OSPF, Parallel programming, Python, Secure coding, Server hardware, Software development, Software quality assurance, TCP/IP, TLS/SSL, U-boot, VPN, Wireshark</p>
 
 <h2 data-techs="c cpp git iptables json libcurl linux parallelprog tcpip embedded linuxkernel tls swdev arm wireshark mips netsec nat http firewalls">
 Spring 2023-Winter 2023/4: Software Developer at F-Secure: &lt;1 year
