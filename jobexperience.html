@@ -454,7 +454,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       }
       const raw = input.value.trim().toLowerCase();
-      const tokens = raw.split(/\s+/).filter(Boolean);
+      const tokens = raw.replace(/,/g,' ').replace(/\./g,' ').replace(/;/g,' ').replace(/:/g,' ').replace(/\?/g,' ').replace(/!/g,' ').replace(/\(/g, ' ').replace(/\)/g, ' ').split(/\s+/).filter(Boolean);
 
       sections.forEach(sec => {
         const haytechs = sec.header.dataset.techs.split(" ");
@@ -480,7 +480,7 @@ document.addEventListener('DOMContentLoaded', function () {
   if (input2) {
     input2.addEventListener('input', function () {
       const raw = input2.value.trim().toLowerCase();
-      const tokens = raw.split(/\s+/).filter(Boolean);
+      const tokens = raw.replace(/,/g,' ').replace(/\./g,' ').replace(/;/g,' ').replace(/:/g,' ').replace(/\?/g,' ').replace(/!/g,' ').replace(/\(/g, ' ').replace(/\)/g, ' ').split(/\s+/).filter(Boolean);
       const techsul = document.getElementById('techs');
       for (var child of techsul.children) {
         var hay = child.textContent.toLowerCase();
