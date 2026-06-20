@@ -483,8 +483,11 @@ document.addEventListener('DOMContentLoaded', function () {
       const tokens = raw.split(/\s+/).filter(Boolean);
       const techsul = document.getElementById('techs');
       for (var child of techsul.children) {
-        const hay = child.textContent.toLowerCase();
-	const show = (tokens.length === 0 || tokens.every(tok => hay.indexOf(tok) !== -1));
+        var hay = child.textContent.toLowerCase();
+	hay = hay.replace(/,/g,' ').replace(/\./g,' ').replace(/;/g,' ').replace(/:/g,' ').replace(/\?/g,' ').replace(/!/g,' ').replace(/\(/g, ' ').replace(/\)/g, ' ');
+	hay = ' ' + hay + ' ';
+	hay = hay.replace(/\s\s+/g, ' ');
+	const show = (tokens.length === 0 || tokens.every(tok => hay.indexOf(' ' + tok + ' ') !== -1));
 	child.style.display = show ? '' : 'none';
       }
     });
