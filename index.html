@@ -154,11 +154,11 @@ img.responsive{max-width:100%;height:auto}
       <div class="stat-count" aria-hidden="true">7K</div>
     </div>
 
-    <div class="stat-item" role="listitem" data-sloc="4000">
+    <div class="stat-item" role="listitem" data-sloc="5000">
       <input type="checkbox" class="lang" data-lang="python" id="lang-python"/>
       <div class="stat-meta">Python</div>
       <div class="bar" aria-hidden="true"><span></span></div>
-      <div class="stat-count" aria-hidden="true">4K</div>
+      <div class="stat-count" aria-hidden="true">5K</div>
     </div>
 
     <div class="stat-item" role="listitem" data-sloc="3000">
@@ -211,6 +211,25 @@ img.responsive{max-width:100%;height:auto}
   <input id="project-search" type="search" placeholder="Search projects by name or text (try: XML, JSON, Java, Python, QUIC)"/>
   <div class="note">Type to filter</div>
 </div>
+
+<h2 data-langs="javascript">pyjsonfrag (1 KSLOC Python)</h2>
+
+<p><a href="https://github.com/jmtilli/pyjsonfrag">pyjsonfrag in Github</a>, <a href="https://pypi.org/project/pyjsonfrag/">pyjsonfrag in PyPI</a></p>
+
+<p>Typically, JSON is parsed by a tree-based parser and almost never by an
+event-based parser. Event-based parsers are fast and have a low memory
+footprint, but a drawback is that it is cumbersome to write the required event
+handlers. Tree-based parsers make the code easier to write, to understand and
+to maintain but have a large memory footprint as a drawback. Usually, JSON is
+not used for huge files such as database dumps that necessitate event-based
+parsing, or so it would appear at a glance, because a tree-based parser cannot
+hold the whole parse tree in memory at the same time, and event-based parsing
+is not available in common libraries. PyJSONFrag allows JSON to be parsed by
+event-based approach from the top, but optionally allowing switching to a
+tree-based approach for small structures. So for example a database dump
+containing billion objects can be parsed in an event-based manner but each
+object can be parsed into a tree. This allows using JSON for huge database
+dumps, and JSON is a far better serialization format than XML.</p>
 
 <h2 data-langs="javascript">nodejsonfrag (2 KSLOC JavaScript)</h2>
 
