@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>jmtilli.github.io</title>
+<style>
+:root{--max-w:1100px;--accent:#0b63d6;--muted:#58606a;}
+*{box-sizing:border-box}
+body{font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;line-height:1.5;margin:0;background:#f3f6fb;color:#101217}
+.main-container{max-width:var(--max-w);margin:28px auto;padding:26px;background:#fff;border-radius:12px;box-shadow:0 8px 30px rgba(16,22,32,0.07)}
+.header{display:flex;gap:16px;align-items:center;margin-bottom:12px}
+.header img{width:96px;height:96px;object-fit:cover;border-radius:8px;border:1px solid #e6e9ee}
+h1{font-size:1.25rem;margin:0}
+.search{margin:12px 0;display:flex;gap:8px}
+.search input{flex:1;padding:8px 10px;border:1px solid #e6e9ee;border-radius:8px;background:#fbfdff}
+.search .note{color:var(--muted);font-size:0.9rem;padding:7px 0 0 6px}
+h2{font-size:1rem;margin:18px 0 6px 0;color:var(--accent);border-bottom:1px dashed #eef2fb;padding-bottom:6px}
+p, li {color:#26323a}
+ul {margin:8px 0 12px 24px}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+img.responsive{max-width:100%;height:auto}
+@media (max-width:700px){.header{flex-direction:column;align-items:flex-start}.main-container{padding:16px}}
+
+/* --- added styles for prettier code counts --- */
+.stats {
+  margin:12px 0;
+  padding:12px;
+  background:linear-gradient(180deg,#ffffff,#fbfdff);
+  border:1px solid #e9f1ff;
+  border-radius:10px;
+}
+.stats .stats-title{font-weight:700;color:#0f2340;margin-bottom:8px}
+.stat-grid{display:flex;flex-wrap:wrap;gap:10px}
+.stat-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:8px;
+  background:#fff;
+  border-radius:8px;
+  border:1px solid #eef6ff;
+  min-width:290px;
+  flex:1 1 260px;
+}
+.stat-meta{width:110px;font-weight:700;color:var(--accent)}
+.bar{flex:1;height:10px;background:#eef6ff;border-radius:8px;overflow:hidden;box-shadow:inset 0 1px 0 rgba(255,255,255,0.6); min-width: 60px;}
+.bar > span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#66a0ff);width:0;transition:width 480ms cubic-bezier(.2,.9,.3,1)}
+.stat-count{min-width:84px;text-align:right;font-weight:600;color:#0b2b45;font-size:0.95rem}
+.stat-footnote{color:var(--muted);font-size:0.9rem;margin-top:8px}
+
+/* keep an invisible filler so the last row keeps the same column widths */
+.stat-item.empty{
+  opacity:0;
+  pointer-events:none;
+  user-select:none;
+}
+/* remove the empty block's bar and text so no visible bar appears */
+.stat-item.empty .bar { display: none; }
+.stat-item.empty .stat-meta,
+.stat-item.empty .stat-count { display: none; }
+
+/* Tabs: repository / job experience */
+.tabs {
+  display:flex;
+  gap:8px;
+  margin:0 0 12px 0;
+  align-items:center;
+}
+.tab {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 12px;
+  border-radius:8px;
+  border:1px solid #e6e9ee;
+  background:#fbfdff;
+  color:#0b2b45;
+  font-weight:700;
+  text-decoration:none;
+  cursor:pointer;
+}
+.tab:hover { transform: translateY(-1px); transition:transform 120ms ease; }
+.tab[aria-selected="true"] {
+  background: linear-gradient(90deg,var(--accent),#66a0ff);
+  color:#fff;
+  border-color: rgba(11,99,214,0.9);
+  box-shadow: 0 8px 24px rgba(11,99,214,0.12);
+}
+.tab:focus { outline:3px solid rgba(11,99,214,0.12); outline-offset:2px; border-radius:8px; }
+@media (max-width:480px) {
+  .tab { padding:8px 10px; font-size:0.95rem; }
+}
+</style>
+</head>
+<body>
+<main class="main-container">
+<!-- tabs inserted before header -->
+<nav class="tabs" role="tablist" aria-label="Site sections">
+  <a href="index.html" class="tab" role="tab" aria-selected="false">Repositories</a>
+  <a href="jobexperience.html" class="tab" role="tab" aria-selected="false">Job experience</a>
+  <a href="contact.html" class="tab" role="tab" aria-selected="true">Contact info</a>
+</nav>
+
+<div class="header">
+  <img src="picture2.jpg" alt="Photo of Juha-Matti Tilli" />
+  <div>
+    <h1>Juha‑Matti Tilli — Contact info</h1>
+    <div style="color:var(--muted);font-size:0.95rem"><!--A curated view of selected repositories--></div>
+  </div>
+</div>
+
+
+<h2>Juha-Matti Tilli at other sites</h2>
+
+<ul>
+	<li><a href="https://orcid.org/0000-0001-6033-4377">Juha-Matti Tilli's ORCID page</a></li>
+	<li><a href="https://fi.linkedin.com/in/juha-matti-tilli">Juha-Matti Tilli's LinkedIn profile</a></li>
+	<li><a href="https://github.com/jmtilli">Juha-Matti Tilli's Github profile</a></li>
+	<li><a href="https://www.researchgate.net/profile/Juha-Matti-Tilli">Juha-Matti Tilli's ResearchGate profile</a></li>
+</ul>
+
+<h2>Contact information</h2>
+<ul>
+        <li id="priv1">Private e-mail: </li>
+        <li id="priv2">Private e-mail: </li>
+        <li id="study">Study e-mail: </li>
+        <li id="work">Work e-mail: </li>
+</ul>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.getElementById('priv1').innerHTML += 'juha-matti.tilli';
+  document.getElementById('priv1').innerHTML += '<span>@</span>';
+  document.getElementById('priv1').innerHTML += 'iki.fi';
+  document.getElementById('priv2').innerHTML += 'juha-matti.tilli';
+  document.getElementById('priv2').innerHTML += '<span>@</span>';
+  document.getElementById('priv2').innerHTML += 'alumni.aalto.fi';
+  document.getElementById('study').innerHTML += 'juha-matti.tilli';
+  document.getElementById('study').innerHTML += '<span>@</span>';
+  document.getElementById('study').innerHTML += 'aalto.fi';
+  document.getElementById('work').innerHTML += 'juha-matti.tilli';
+  document.getElementById('work').innerHTML += '<span>@</span>';
+  document.getElementById('work').innerHTML += 'goodmillsystems.com';
+});
+</script>
+
+</main>
+</body>
+</html>
