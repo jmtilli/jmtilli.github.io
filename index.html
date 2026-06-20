@@ -659,8 +659,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
       sections.forEach(sec => {
         const haylangs = sec.header.dataset.langs.split(" ");
-        const hay = (sec.header.textContent + ' ' + sec.nodes.map(n => n.textContent).join(' ')).toLowerCase();
-        const show = (tokens.length === 0 || tokens.every(tok => hay.indexOf(tok) !== -1)) && (langs.length === 0 || langs.every(lang => haylangs.indexOf(lang) !== -1));
+        var hay = (sec.header.textContent + ' ' + sec.nodes.map(n => n.textContent).join(' ')).toLowerCase();
+	hay = hay.replace(/,/g,' ').replace(/\./g,' ').replace(/;/g,' ').replace(/:/g,' ').replace(/\?/g,' ').replace(/!/g,' ').replace(/\(/g, ' ').replace(/\)/g, ' ');
+	hay = ' ' + hay + ' ';
+	hay = hay.replace(/\s\s+/g, ' ');
+        const show = (tokens.length === 0 || tokens.every(tok => hay.indexOf(' ' + tok + ' ') !== -1)) && (langs.length === 0 || langs.every(lang => haylangs.indexOf(lang) !== -1));
         sec.header.style.display = show ? '' : 'none';
         sec.nodes.forEach(n => n.style.display = show ? '' : 'none');
       });

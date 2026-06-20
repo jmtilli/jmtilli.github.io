@@ -458,8 +458,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
       sections.forEach(sec => {
         const haytechs = sec.header.dataset.techs.split(" ");
-        const hay = (sec.header.textContent + ' ' + sec.nodes.map(n => n.textContent).join(' ')).toLowerCase();
-        const show = (tokens.length === 0 || tokens.every(tok => hay.indexOf(tok) !== -1)) && (techs.length === 0 || techs.every(tech => haytechs.indexOf(tech) !== -1));
+        var hay = (sec.header.textContent + ' ' + sec.nodes.map(n => n.textContent).join(' ')).toLowerCase();
+	hay = hay.replace(/,/g,' ').replace(/\./g,' ').replace(/;/g,' ').replace(/:/g,' ').replace(/\?/g,' ').replace(/!/g,' ').replace(/\(/g, ' ').replace(/\)/g, ' ');
+	hay = ' ' + hay + ' ';
+	hay = hay.replace(/\s\s+/g, ' ');
+        const show = (tokens.length === 0 || tokens.every(tok => hay.indexOf(' ' + tok + ' ') !== -1)) && (techs.length === 0 || techs.every(tech => haytechs.indexOf(tech) !== -1));
         sec.header.style.display = show ? '' : 'none';
         sec.nodes.forEach(n => n.style.display = show ? '' : 'none');
       });
