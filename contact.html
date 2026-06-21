@@ -84,7 +84,7 @@ img.responsive{max-width:100%;height:auto}
   cursor:pointer;
 }
 .tab:hover { transform: translateY(-1px); transition:transform 120ms ease; }
-.tab[aria-selected="true"] {
+.tab.active {
   background: linear-gradient(90deg,var(--accent),#66a0ff);
   color:#fff;
   border-color: rgba(11,99,214,0.9);
@@ -99,11 +99,11 @@ img.responsive{max-width:100%;height:auto}
 <body>
 <main class="main-container">
 <!-- tabs inserted before header -->
-<nav class="tabs" role="tablist" aria-label="Site sections">
-  <a href="index.html" class="tab" role="tab" aria-selected="false">Repositories</a>
-  <a href="jobexperience.html" class="tab" role="tab" aria-selected="false">Job experience</a>
-  <a href="education.html" class="tab" role="tab" aria-selected="false">Education</a>
-  <a href="contact.html" class="tab" role="tab" aria-selected="true">Contact info</a>
+<nav class="tabs" aria-label="Site sections">
+  <a href="index.html" class="tab">Repositories</a>
+  <a href="jobexperience.html" class="tab">Job experience</a>
+  <a href="education.html" class="tab">Education</a>
+  <a href="contact.html" class="tab active">Contact info</a>
 </nav>
 
 <div class="header">
