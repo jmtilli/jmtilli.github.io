@@ -33,7 +33,7 @@ img.responsive{max-width:100%;height:auto}
   border:1px solid #e9f1ff;
   border-radius:10px;
 }
-.stats .stats-title{font-weight:700;color:#0f2340;margin-bottom:8px}
+.stats .stats-title{font-weight:700;color:#0f2340;margin:0 0 8px 0;border:0;padding:0}
 .stat-grid{display:flex;flex-wrap:wrap;gap:10px}
 .stat-item{
   display:flex;
@@ -116,7 +116,7 @@ img.responsive{max-width:100%;height:auto}
 
 <!-- prettier code counts -->
 <section class="stats" aria-labelledby="stats-title">
-  <div id="stats-title" class="stats-title">Code composition</div>
+  <h2 id="stats-title" class="stats-title">Code composition</h2>
 
   <div class="stat-grid" role="list" aria-hidden="false">
     <div class="stat-item" role="listitem" data-sloc="152000">
@@ -635,7 +635,7 @@ differential evolution for fitting, and supports quite many data formats.</p>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   // build an index of top-level sections: every H2 plus following siblings until next H1/H2
-  const headers = Array.from(document.querySelectorAll('h2'));
+  const headers = Array.from(document.querySelectorAll('h2:not(#stats-title)'));
   const sections = headers.map(h => {
     const nodes = [];
     let n = h.nextElementSibling;
