@@ -189,6 +189,13 @@ img.responsive{max-width:100%;height:auto}
       <div class="stat-count" aria-hidden="true">1K</div>
     </div>
 
+    <div class="stat-item" role="listitem" data-sloc="200">
+      <input type="checkbox" class="lang" data-lang="cpp" id="lang-cpp"/>
+      <div class="stat-meta">C++</div>
+      <div class="bar" aria-hidden="true"><span></span></div>
+      <div class="stat-count" aria-hidden="true">200</div>
+    </div>
+
     <div class="stat-item" role="listitem" data-sloc="100">
       <input type="checkbox" class="lang" data-lang="perl" id="lang-perl"/>
       <div class="stat-meta">Perl</div>
@@ -211,6 +218,19 @@ img.responsive{max-width:100%;height:auto}
   <input id="project-search" type="search" placeholder="Search projects by name or text (try: XML, JSON, Java, Python, QUIC)"/>
   <div class="note">Type to filter</div>
 </div>
+
+<h2 data-langs="cpp">cppmoveptralloc (200 SLOC C++)</h2>
+
+<p><a href="https://github.com/jmtilli/cppmoveptralloc">cppmoveptralloc in Github</a></p>
+
+<p>cppmoveptralloc is intended for allocation use cases in C++, where all
+allocated objects are freed right when the program exits, or similarly if a
+whole bunch of allocations should be freed at exactly the same time. The
+allocator is a simple move-the-pointer allocator, which is the simplest and
+fastest possible allocator ever possible. However, the drawback is that such an
+allocator does not support freeing memory, except if all allocations are freed
+at exactly the same moment and none are left. This is exactly what is done
+here: the allocations are invalidated when the allocator goes out of scope.</p>
 
 <h2 data-langs="python">pyjsonfrag (2 KSLOC Python)</h2>
 
