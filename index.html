@@ -189,11 +189,11 @@ img.responsive{max-width:100%;height:auto}
       <div class="stat-count" aria-hidden="true">1K</div>
     </div>
 
-    <div class="stat-item" role="listitem" data-sloc="400">
+    <div class="stat-item" role="listitem" data-sloc="900">
       <input type="checkbox" class="lang" data-lang="cpp" id="lang-cpp"/>
       <div class="stat-meta">C++</div>
       <div class="bar" aria-hidden="true"><span></span></div>
-      <div class="stat-count" aria-hidden="true">400</div>
+      <div class="stat-count" aria-hidden="true">900</div>
     </div>
 
     <div class="stat-item" role="listitem" data-sloc="100">
@@ -218,6 +218,22 @@ img.responsive{max-width:100%;height:auto}
   <input id="project-search" type="search" placeholder="Search projects by name or text (try: XML, JSON, Java, Python, QUIC)"/>
   <div class="note">Type to filter</div>
 </div>
+
+<h2 data-langs="cpp">cppjmalloc (500 SLOC C++)</h2>
+
+<p><a href="https://github.com/jmtilli/cppjmalloc">cppjmalloc in Github</a></p>
+
+<p>cppjmalloc is the C++ version of jmalloc, an allocator that's on a
+completely different location of the high performance - low fragmentation scale
+than most allocators out there. While most allocators waste CPU cycles to save
+memory, cppjmalloc saves CPU cycles by wasting memory. Its interface that is
+purposefully different from the standard C allocator interface by requiring
+deallocation to be passed the block size is a natural fit for C++ applications,
+because the C++ standard interfaces for deallocation do exactly that and allow
+the different interface of jmalloc to be used with C++ standard containers
+without code modifications. The C version of jmalloc was benchmarked to be
+about 3 times faster than the standard Linux allocator, and the same can be
+expected from the C++ version as well.</p>
 
 <h2 data-langs="cpp">cppmoveptralloc (400 SLOC C++)</h2>
 
